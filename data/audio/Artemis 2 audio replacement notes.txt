@@ -1,0 +1,91 @@
+These are Quaris's notes for replacing the Cosmos gui's default audio with the Artemis 2 gui audio.
+If you find a problem with how they're mapped, or otherwise want to improve on them somehow, etc., hopefully these notes help.
+
+Rough descriptions of the numbered beeps, for reference
+
+	Artemis 2		Cosmos
+	testIUSound#		beep#
+0*	lo hi me
+1*	hi me lo		lo hi
+2*	lo me hi		lo hi lo - lower than v
+3	hi me hi		lo hi lo - higher than ^
+4*	me1 lo (me2) hi		me1 lo hi (me2)
+5*	me lo hi		hi me lo me
+6**	(hi) lo hi lo		lo me hi
+7				hi me lo
+8	lo (me) (hi)		hi lo me
+9*	hi (lo) (me)		hi lo - same as v
+10*	trill up? neutral?	hi lo - same as ^
+11	trill up?		me
+12*	trill up? neutral?	hi me (lo)
+13*	trill down		hi lo - lower than 9 and 10
+14* 	lo (me?) hi		lo hi me
+15*	trill, neutral?
+16*	hi lo hi
+17*	hi (lo) hi
+18	trill, up? neutral? down?
+19*	trill down
+20	trill up? neutral? down?
+21**	trill down - similar v
+22	trill down - similar ^
+23***	lo hi
+24*	trill down - similar to 21/22, especially 21
+25*	hi (me) lo
+26*	hi lo (hi)
+
+~~~~~
+
+My approximate mappings of Artemis 2 files to Cosmos files
+
+Cosmos: Artemis 2
+
+1: 23, ~14
+2: ~6
+3: 6
+4: 5, ~0, ~4
+5: 26, ~16
+6: 2
+7: 1, ~24, ~25
+8: 21 (or 22), ~13, ~1
+9/10: 13, ~25, ~19
+11: 10
+12: 24, ~1, ~25
+13: 25
+14: 0
+
+fighter_shot: fighter-zap
+
+gui_button: 9
+gui_comms: 15
+gui_comms_back: 19
+gui_comms_open: 12
+
+gui_drag:
+gui_list_select: 23 - only seems to play for damcon list
+gui_lock: 23 - matches science at least; weapons will be diff
+gui_main_screen: 21 (or 22)
+gui_tab: 14 # more like radios, e.g. beam freq
+
+gui_torp_fire: 16
+gui_torp_load: 17 (maybe not exactly? closest I could find)
+
+jumpDriveComplete: WarpTravel
+jumpDriveStart2: jumpWarmup - but length cut "even shorter" to less than 1 second
+
+missile_launch: weapon1
+newBeam1: weapon0
+newBeam2: weapon0
+newBeam3: weapon0
+newBeam4: weapon0
+
+overheat_warning: overheat-warning
+
+player_hull_hit: hullHit
+
+red_alert: alarm3
+
+shield-hit[1-6]: shieldHit
+shld_down: shieldsDown
+shld_up: shieldsUp
+
+tractor: tractor
