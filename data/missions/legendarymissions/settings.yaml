@@ -170,6 +170,7 @@ CONSOLE_EXCLUSIVITIES:
     comms: true
     mainscreen: false
     threeDview: false
+    simplemap: false
     cinematic: false
     display_panels: false
     
