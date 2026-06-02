@@ -1,21 +1,42 @@
 import upgrade.py
 
 
-gui_tab_add_top("upgrade")
 shared UPGRADE_TAB_ENABLED = True
 
 //gui/tab/upgrade
-    jump upgrade_screen
+    gui_switch_to(upgrade_screen)
+    ->END
 
 === upgrade_screen
-    if not ensure_on_gui_task(upgrade_screen):
+    if not prepare_console(gui_top_tab_upgrades_key(), rerun_label=upgrade_screen, widget_list=""):
         ->END
     
-    gui_tab_back(CONSOLE_SELECT)
     # Get inventory values for upgrade counts and timers.
 
-
-    ship_id = sbs.get_ship_of_client(client_id)  
+    # Assigning the client to no ship at all doesn't seem possible (at least,
+    # not for the engine's assignment, without subtly causing crashes related
+    # to showing the 3d view widget.)
+    # Therefore, sometimes clients are left assigned to a ship when they
+    # really shouldn't be assigned to any ship at all.
+    # So to determine whether the client's ship assignment should actually be
+    # trusted, look at whether the client has selected any ship-specific consoles.
+    # TODO this should probably be a getter or flag in GAME_SETUP_DATA
+    selected_ship = GAME_SETUP_DATA.get_selected_ship(client_id)
+    if selected_ship is None or not selected_ship.is_at_least_one_console_selected_by_client(client_id):
+        gui_section(style="area:0,36px,100,100;")
+        gui_row()
+        gui_blank()
+        gui_row(style="row-height:60px;")
+        gui_text("There are no player ship upgrades to view, because this game client is not associated with any player ship.", style=f"justify:center;color:{color_text()};")
+        # TODO if not locked out of switching to a different console
+        if True:
+            gui_row(style="row-height:60px;")
+            gui_text("To view a player ship's upgrades, select a console specific to that ship, such as its helm or mainscreen console.", style=f"justify:center;color:{color_text()};")
+        gui_row()
+        gui_blank()
+        await gui_patched()
+    
+    ship_id = selected_ship.spawned_ship_id
     ->END if not ship_id
     
     qlog(qlog_level_info(), "opening upgrades screen", client_id=client_id, player_ship_id=ship_id)
@@ -348,7 +369,7 @@ shared UPGRADE_TAB_ENABLED = True
     signal_register(signal_upgrade_timer_tick(ship_id), upgrade_screen_on_timer_tick, is_temporary=True)
     signal_register(signal_upgrade_timer_ended(ship_id), upgrade_screen_redraw, is_temporary=True)
     
-    await gui()
+    await gui_patched()
 
 ==== upgrade_screen_redraw ====
     qlog(qlog_level_info(), "redrawing upgrades screen", client_id=client_id, player_ship_id=ship_id)

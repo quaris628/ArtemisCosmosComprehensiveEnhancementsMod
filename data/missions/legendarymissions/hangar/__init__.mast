@@ -1,6 +1,8 @@
 import ../../common/library_function_patches.py
 import ../../common/q_logger.py
 
+import ../game_setup/console_code_helpers.py
+
 import hangar.py
 import hangar.mast
 import missions.mast

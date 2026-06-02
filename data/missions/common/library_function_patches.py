@@ -15,6 +15,23 @@ from sbs_utils.procedural.gui.property_listbox import _gui_properties_items
 from sbs_utils.procedural.style import apply_control_styles
 from sbs_utils.procedural.timers import delay_app
 
+# for debugging
+def print_current_task():
+    task = FrameContext.task
+    print(f"{task.id} gui={task.is_gui_task} subtask={task.is_sub_task} is FrameContext.task")
+    task = FrameContext.page.gui_task
+    print(f"{task.id} gui={task.is_gui_task} subtask={task.is_sub_task} is FrameContext.page.gui_task")
+    task = FrameContext.client_task
+    print(f"{task.id} gui={task.is_gui_task} subtask={task.is_sub_task} is FrameContext.client_task")
+
+def get_current_task():
+    return FrameContext.task
+
+# ----- set_widget_list -----
+
+def set_widget_list(console, widgets):
+    FrameContext.page.set_widget_list(console, widgets)
+
 # ----- switching GUIs -----
 
 # The relationship between (re)drawing a GUI and what task/code the
@@ -225,6 +242,14 @@ class ChoiceButtonRuntimeNode: # pylint: disable=too-few-public-methods
         if event.sub_tag == self.tag:
             self.promise.press_button(self.button)
 
+# ----- music folder -----
+
+# https://github.com/artemis-sbs/LegendaryMissions/issues/564
+# This music_base_folder setting is practically never respected in vanilla
+def get_full_music_file_path(name):
+    music_base_folder = FrameContext.context.sbs.get_preference_string("music_base_folder")
+    return f"music/{music_base_folder}/{name}"
+
 # ----- reroute -----
 
 def reroute(client_id, label_for_both_or_server, label_for_client=None):
@@ -234,6 +259,157 @@ def reroute(client_id, label_for_both_or_server, label_for_client=None):
         if label_for_client is None:
             label_for_client = label_for_both_or_server
         gui_reroute_client(client_id, label_for_client)
+
+# ----- drop-downs -----
+
+# https://github.com/artemis-sbs/LegendaryMissions/issues/568
+# Caused lots of sync issues with the ship type editing dropdowns
+
+# sbs_utils/procedural/gui/dropdown.py gui_drop_down()
+def gui_dropdown_patched(values, value=None, style=None, var=None, data=None):
+    """ Draw a gui drop down list 
+
+    Args:
+        values (list[str] | str): list of options, either as a list of
+            strings or as a comma-delimited string
+        value (str | None): Default first option in the list.
+            What option starts as selected.
+        style (style, optional): Style. Defaults to None.
+        var (str, optional): Variable name to set the selection to. Defaults to None.
+        data (object, optional): data to pass the handler. Defaults to None.
+
+    Returns:
+        layout object: The Layout object created
+    """
+    page = FrameContext.page
+    task = FrameContext.task
+    if page is None:
+        return None
+    tag = page.get_tag()
+    layout_item = DropdownPatched(tag, values, value, style)
+    layout_item.data = data # pylint: disable=attribute-defined-outside-init
+    if var is not None:
+        layout_item.var_name = var # pylint: disable=attribute-defined-outside-init
+        layout_item.var_scope_id = task.get_id() # pylint: disable=attribute-defined-outside-init
+    apply_control_styles(".dropdown", style, layout_item, task)
+    # Last in case tag changed in style
+    page.add_content(layout_item, None)
+    return layout_item
+
+# sbs_utils/pages/layout/dropdown.py class Dropdown
+class DropdownPatched(Column):
+    def __init__(self, tag, values, value=None, style=None):
+        super().__init__()
+        
+        self.tag = tag
+        
+        if isinstance(values, str):
+            self._values_as_list = values.split(",")
+            self._values_as_csv = values
+        else: # list
+            self._values_as_list = values
+            self._values_as_csv = ",".join(values)
+        
+        if value is None:
+            if len(self._values_as_list) > 0:
+                self._selected_value = self._values_as_list[0]
+            else:
+                self._selected_value = ""
+        else:
+            self._selected_value = value
+        
+        if style is None or len(style) == 0:
+            self._style = ""
+        elif style[-1] != ";": # see issue #99
+            self._style = f"{style};"
+        else:
+            self._style = style
+        
+        self._props_cache = self._get_props_string()
+    
+    @property
+    def values_as_list(self):
+        return self._values_as_list
+    
+    @values_as_list.setter
+    def values_as_list(self, val):
+        self._values_as_list = val
+        self._values_as_csv = ",".join(val)
+        self._default_selected_value()
+        self._update_props_cache()
+        # mark dirty?
+    
+    @property
+    def values_as_csv(self):
+        return self._values_as_csv
+    
+    @values_as_csv.setter
+    def values_as_csv(self, val):
+        self._values_as_list = val.split(",")
+        self._values_as_csv = val
+        self._default_selected_value()
+        self._update_props_cache()
+        # mark dirty?
+    
+    def _default_selected_value(self):
+        if self._selected_value in self._values_as_list:
+            return
+        if len(self._values_as_list) > 0:
+            self._selected_value = self._values_as_list[0]
+        else:
+            self._selected_value = ""
+        self._update_props_cache()
+    
+    @property
+    def value(self):
+        return self._selected_value
+    
+    @value.setter
+    def value(self, val):
+        self._update_selected_value(val)
+        # mark dirty?
+    
+    # for behavior shared between being triggered programatically
+    # and triggered by a gui click
+    def _update_selected_value(self, val):
+        if self._selected_value == val:
+            return
+        if val not in self._values_as_list:
+            if len(self._selected_value) == 0:
+                return
+            val = ""
+        self._selected_value = val
+        self._update_props_cache()
+        self.update_variable()
+    
+    def update_style(self, val):
+        if self._style == val:
+            return
+        if val is None or len(val) == 0:
+            self._style = ""
+        elif val[-1] != ";":
+            # see issue #99
+            # creating an intermediate string value adds a small performance cost
+            # but hopefully this correction won't be needed very often
+            self._style = f"{val};"
+        else:
+            self._style = val
+        self._update_props_cache()
+        # mark dirty?
+    
+    def _update_props_cache(self):
+        self._props_cache = self._get_props_string()
+    
+    def _get_props_string(self):
+        return f"$text:{self._selected_value};list:{self._values_as_csv};{self._style}"
+    
+    def _present(self, event):
+        FrameContext.context.sbs.send_gui_dropdown(event.client_id, self.region_tag, self.tag, self._props_cache, self.bounds.left, self.bounds.top, self.bounds.right, self.bounds.bottom)
+        
+    def on_message(self, event):
+        if event.sub_tag == self.tag:
+            self._update_selected_value(event.value_tag)
+        super().on_message(event)
 
 # ----- text input -----
 
