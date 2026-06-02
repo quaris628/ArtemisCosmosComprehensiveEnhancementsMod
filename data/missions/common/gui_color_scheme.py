@@ -34,6 +34,6 @@ def color_divider_secondary():
 # For details as to why see legendarymissions/game_setup/background_skybox_hack.py
 # The fake button's background should be roughtly match the real button's background
 def color_fake_options_button_background():
-    return "#323232"
+    return "#00385f"
 
 # Also see color config fields in preferences.json
