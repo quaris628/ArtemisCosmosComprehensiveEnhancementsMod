@@ -11,7 +11,7 @@ shared next_call_sign = 0
 shared find_stray = task_schedule(find_stray_crafts)
 
 # Just make sure the data loads
-hangar_get_craft_data("terran")
+hangar_get_craft_data("tsn")
 #
 # The route_spawn label is the entry point 
 # it examines the SPAWNED_ID to either
