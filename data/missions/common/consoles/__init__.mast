@@ -8,6 +8,7 @@ import ../../common/gui_repair_levels_display.py
 import standard_consoles.mast
 import manual_weapons.mast
 
+import ../engineering/energy_management_controls.py
 import layout_widgets.py
 import layout_widgets.mast
 
