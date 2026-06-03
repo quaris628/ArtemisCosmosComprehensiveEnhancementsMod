@@ -107,6 +107,30 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
         gui_row("row-height: 400px;")
         gui_info_panel(tab=tab)
         gui_info_panel_add("message", 83, gui_panel_console_message,None, gui_panel_console_message_tick)
+    
+    player_ship_id = sbs.get_ship_of_client(client_id)
+    # Make text separate from buttons to allow using justify:center (and other fancy stuff)
+    gui_section(style="area:10px,445px,280px,510px")
+    disassemble_button = gui_button("")
+    manufacture_button = gui_button("")
+    gui_section(style="area:10px,448px,280px,520px")
+    gui_row(style="row-height:20px;")
+    gui_text("Disassemble", style=f"font:gui-2;justify:center;color:{color_text()};")
+    gui_text("Manufacture", style=f"font:gui-2;justify:center;color:{color_text()};")
+    # Maybe update this text to different ordinance types if
+    # converting them is allowed in the future
+    gui_row(style="row-height:20px;")
+    gui_text("Homing", style=f"font:gui-2;justify:center;color:{color_text()};")
+    gui_text("Homing", style=f"font:gui-2;justify:center;color:{color_text()};")
+    gui_row(style="row-height:20px;")
+    gui_text("+100 Energy", style=f"font:gui-1;justify:center;color:{color_text()};")
+    gui_text("-150 Energy", style=f"font:gui-1;justify:center;color:{color_text()};")
+    on gui_message(disassemble_button):
+        to_energy(player_ship_id, ordinance_type_homing())
+    on gui_message(manufacture_button):
+        manufacture(player_ship_id, ordinance_type_homing())
+    
+    yield idle
 
 //gui/normal_main
     default tab = 1
