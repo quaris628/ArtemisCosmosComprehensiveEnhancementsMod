@@ -186,6 +186,18 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
     on gui_message(manufacture_button):
         manufacture(player_ship_id, ordinance_type_homing())
     
+    if has_orientable_beams(player_ship_id):
+        gui_section(style="area:80,57,100,64;")
+        gui_row()#style="row-height:3.5;")
+        gui_text("Beam Arc Configuration", style=f"font:gui-1;justify:center;color:{color_text()};")
+        gui_row()#style="row-height:3.5;")
+        forward_button = gui_button("Ahead", style=f"font:gui-2;color:{color_text()};")
+        broad_button = gui_button("Broad", style=f"font:gui-2;color:{color_text()};")
+        on gui_message(forward_button):
+            orient_beams_forward(player_ship_id)
+        on gui_message(broad_button):
+            orient_beams_broad(player_ship_id)
+    
     yield idle
 
 //gui/normal_main
