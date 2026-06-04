@@ -3,6 +3,7 @@ import ../../common/common_signals.py
 import ../../common/ordinance_conversion.py
 import ../../common/gui_repair_levels_display.py
 import ../../common/controller_vessel_types_data.py
+import ../../common/orient_beams.py
 
 #import ../game_setup/console_code_helpers.py
 
