@@ -54,7 +54,6 @@ shared UPGRADE_TAB_ENABLED = True
     cc_timer = get_inventory_value(ship_id, "cc_timer", 0)
     ip_timer = get_inventory_value(ship_id, "ip_timer", 0)
     tf_timer = get_inventory_value(ship_id, "tf_timer", 0)
-    sc_timer = get_inventory_value(ship_id, "sc_timer", 0)
     vn_timer = get_inventory_value(ship_id, "vn_timer", 0)
     cl_timer = get_inventory_value(ship_id, "cl_timer", 0)
     la_timer = get_inventory_value(ship_id, "la_timer", 0)
@@ -89,10 +88,7 @@ shared UPGRADE_TAB_ENABLED = True
         """$text: {tf_count};""" style="tag:sh-tf-count;"
 
     gui_row()
-    if sc_timer > 0:
-        """color:#0f0;$text: {sc_count};""" style="tag:sh-sc-count;"
-    else:
-        """$text: {sc_count};""" style="tag:sh-sc-count;"
+    """$text: {sc_count};""" style="tag:sh-sc-count;"
 
     gui_row()
     """$text: {vn_count};""" style="tag:sh-vn-count;"
@@ -182,22 +178,8 @@ shared UPGRADE_TAB_ENABLED = True
         else:
             """$text: Tauron Focuser;""" style="tag:sh-tf-txt;"
     gui_row()
-    if sc_count > 0 and can_activate_comms_upgrades and not sc_timer > 0:
-        on gui_message(gui_button("Secret Codecase")):
-            sc_count -= 1
-            set_inventory_value(ship_id, "secret_codecase", sc_count)
-            set_inventory_value(ship_id, "sc_timer", 300)
-            sc_timer = get_inventory_value(ship_id, "sc_timer" )
-            comms_broadcast(ship_id, "Secret Codecase Activated", "#FF0")
-            task_schedule_server(sc_countdown)
-            qlog(qlog_level_info(), "activated secret_codecase", client_id=client_id, player_ship_id=ship_id)
-            signal_emit(signal_upgrade_activated(ship_id))
-
-    else:
-        if sc_timer > 0:
-            """color:#0f0;$text: Secret Codecase;""" style="tag:sh-sc-txt;"
-        else:
-            """$text: Secret Codecase;""" style="tag:sh-sc-txt;"
+    
+    """$text: Secret Codecase;""" style="tag:sh-sc-txt;"
 
     gui_row()
     if vn_count > 0 and can_activate_engineering_upgrades:
@@ -342,11 +324,8 @@ shared UPGRADE_TAB_ENABLED = True
         sh_timer_texts["tf_timer"] = gui_text("5 Minute 100% Beam and Reload Speed Boost")
     
     gui_row()
-    if sc_timer > 0:
-        sh_timer_texts["sc_timer"] = gui_text(f"{sc_timer} seconds remaining", style="color:#0f0;")
-    else:
-        sh_timer_texts["sc_timer"] = gui_text("Force one enemy ship to auto-surrender")
-    
+    """$text: Force one enemy ship to auto-surrender""" style="tag:sh-sc-timer;"
+
     gui_row()
     if vn_timer > 0:
         sh_timer_texts["vn_timer"] = gui_text("Damage Control Teams already at full strength", style="color:#ff0;")
@@ -490,19 +469,6 @@ shared UPGRADE_TAB_ENABLED = True
     player_blob.set("all_beam_upgrade_coeff", beamfaster)
     player_blob.set("all_tube_upgrade_coeff", tubefaster)
     qlog(qlog_level_info(), "tauron_focuser is no longer active", client_id=client_id, player_ship_id=ship_id)
-    signal_emit(signal_upgrade_timer_ended(ship_id))
-    ->END
-
-===== sc_countdown ===== # Code for using Secred Codecase in comms.mast
-    for x in range(300):
-        sc_timer = get_inventory_value(ship_id, "sc_timer" )
-        signal_emit(signal_upgrade_timer_tick(ship_id), data={"UPGRADE_TIMER_TYPE": "sc_timer", "SECONDS_REMAINING": sc_timer})
-        break if sc_timer == 0
-        sc_timer -= 1
-        set_inventory_value(ship_id, "sc_timer", sc_timer )
-        await delay_sim(1)
-
-    qlog(qlog_level_info(), "secret_codecase is no longer active", client_id=client_id, player_ship_id=ship_id)
     signal_emit(signal_upgrade_timer_ended(ship_id))
     ->END
 
