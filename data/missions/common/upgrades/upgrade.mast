@@ -324,7 +324,7 @@ shared UPGRADE_TAB_ENABLED = True
         sh_timer_texts["tf_timer"] = gui_text("5 Minute 100% Beam and Reload Speed Boost")
     
     gui_row()
-    """$text: Force one enemy ship to auto-surrender""" style="tag:sh-sc-timer;"
+    """$text: Force one enemy ship to auto-surrender (Activated via a special comms message)""" style="tag:sh-sc-timer;"
 
     gui_row()
     if vn_timer > 0:
