@@ -186,6 +186,35 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
     on gui_message(manufacture_button):
         manufacture(player_ship_id, ordinance_type_homing())
     
+    if has_orientable_beams(player_ship_id):
+        gui_section(style="area:80,57,100,64;")
+        gui_row()
+        gui_text("Beam Arc Orientation", style=f"font:gui-1;justify:center;color:{color_text()};")
+        gui_row()
+        # Must use gui_checkbox instead of gui_radio in order to customize the color
+        forward_checkbox = gui_checkbox("Ahead", style=f"font:gui-2;color:{color_text()};")
+        broad_checkbox = gui_checkbox("Broad", style=f"font:gui-2;color:{color_text()};")
+        if is_beam_orientation_forward(player_ship_id):
+            forward_checkbox.value = True
+        else:
+            broad_checkbox.value = True
+        on gui_message(forward_checkbox):
+            if is_beam_orientation_forward(player_ship_id):
+                forward_checkbox.value = True
+                # No need to gui_represent_patched
+            else:
+                broad_checkbox.value = False
+                gui_represent_patched(broad_checkbox)
+                orient_beams_forward(player_ship_id)
+        on gui_message(broad_checkbox):
+            if not is_beam_orientation_forward(player_ship_id):
+                broad_checkbox.value = True
+                # No need to gui_represent_patched
+            else:
+                forward_checkbox.value = False
+                gui_represent_patched(forward_checkbox)
+                orient_beams_broad(player_ship_id)
+    
     yield idle
 
 //gui/normal_main
