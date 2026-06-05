@@ -8,6 +8,10 @@ default TASK_LISTEN_FOR_AFTER_PLAYER_SHIP_DESTROYED = None
         # The server's screen is handled separately at the bottom of gui_game_setup.mast
         # It shouldn't ever be switched to console selection
         ->END
+    if has_role(DESTROYING_PLAYER_SHIP_ID, "cockpit") and sbs.get_ship_of_client(client_id) == DESTROYING_PLAYER_SHIP_ID:
+        gui_switch_to(show_hangar, client_id=client_id)
+        ->END
+    GAME_SETUP_DATA = get_game_setup_data()
     selected_ship = GAME_SETUP_DATA.get_selected_ship(client_id)
     if selected_ship is None:
         ->END
@@ -19,7 +23,6 @@ default TASK_LISTEN_FOR_AFTER_PLAYER_SHIP_DESTROYED = None
         selected_ship.deselect_all_consoles(client_id)
         gui_remove_top_tabs(ship_specific_top_tab_keys)
         ->END
-    GAME_SETUP_DATA = get_game_setup_data()
     if not GAME_SETUP_DATA.is_client_ready(client_id):
         ->END
     
