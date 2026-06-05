@@ -8,6 +8,9 @@ default TASK_LISTEN_FOR_AFTER_PLAYER_SHIP_DESTROYED = None
         # The server's screen is handled separately at the bottom of gui_game_setup.mast
         # It shouldn't ever be switched to console selection
         ->END
+    if has_role(DESTROYING_PLAYER_SHIP_ID, "cockpit"):
+        gui_switch_to(show_hangar, client_id=client_id)
+        ->END
     selected_ship = GAME_SETUP_DATA.get_selected_ship(client_id)
     if selected_ship is None:
         ->END
