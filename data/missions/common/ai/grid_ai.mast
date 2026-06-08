@@ -9,6 +9,11 @@ default shared grid_data = grid_get_grid_data()
 
 
 //spawn if has_role(SPAWNED_ID, "__player__")
+    # Be warned, this code is quite delicate and has multiple workarounds
+    # that I don't understand why they work or are necessary.
+    # If you need to modify this, be very careful, and be sure to test what
+    # happens when the relevant console opens as soon as the game starts.
+    
     # This delay seems to be necessary in order for the engineering
     # grid widget to be colored correctly. I don't know why.
     await delay_app(0.1)
@@ -25,6 +30,10 @@ default shared grid_data = grid_get_grid_data()
     if player_ship_object.art_id in grid_data:
         # Create the interior for the ship, defined in grid_ai
         grid_rebuild_grid_objects(SPAWNED_ID, grid_data)
+        signal_emit(signal_all_system_nodes_repair_changed(SPAWNED_ID), data={"SHIP_ID": SPAWNED_ID, "IS_RESET_TO_ALL_NOMINAL": True})
+        # For some reason a delay here seems necessary in order to correctly
+        # read any grid objects and their data; otherwise the grid appears empty
+        task_schedule(spawn_player_ship_emit_system_nodes_repair_changed_after_delay, data={"SHIP_ID": SPAWNED_ID})
     
     # I have absolutely no clue why, but jump_drive_active needs to be set in
     # setup_game() in controller_game_setup_data.py, while warp_drive_active and
@@ -49,7 +58,15 @@ default shared grid_data = grid_get_grid_data()
     
     ->END
 
-
+==== spawn_player_ship_emit_system_nodes_repair_changed_after_delay ====
+    # idk if delay_app or delay_sim is better
+    await delay_app(0.1)
+    
+    # Set IS_RESET_TO_ALL_NOMINAL to False just in case something
+    # got damaged during the short delay
+    signal_emit(signal_all_system_nodes_repair_changed(SPAWNED_ID), data={"SHIP_ID": SHIP_ID, "IS_RESET_TO_ALL_NOMINAL": False})
+    
+    ->END
 
 //spawn/grid if has_role(SPAWNED_ID, "damcons")
     set_inventory_value(SPAWNED_ID, "idle", True)
@@ -141,7 +158,23 @@ default shared grid_data = grid_get_grid_data()
     #
     at_point = hm.get_objects_at_point(x,y)
     grid_repair_grid_objects(obj.host_id, at_point, SPAWNED_ID)
-
+    
+    # Currently, this code never seems to be executed.
+    # Still sync the repair levels display here just in case this code
+    # either actually does get executed currently, or starts getting
+    # executed in a future vanilla version.
+    
+    # Hallway fires are considered a grid object
+    # and they can get removed by the above function,
+    # which makes the at_point list get out-of-date.
+    at_point = hm.get_objects_at_point(x, y)
+    for grid_object_id in at_point:
+        if not has_role(grid_object_id, "system"):
+            continue
+        # It might be more efficient to send batches of systems in a single signal,
+        # but currently all ship layouts have at most one system node per point anyway.
+        signal_emit(signal_system_nodes_repair_changed(obj.host_id), data={"SHIP_ID": obj.host_id, "GRID_OBJECT_IDS": [grid_object_id]})
+    
     # I'm done with this guy
     set_inventory_value(SPAWNED_ID, "target_room", None )
 

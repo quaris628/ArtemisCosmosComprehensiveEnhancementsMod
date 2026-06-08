@@ -3,6 +3,8 @@
     any_damage = to_grid_object(grid_closest(UPGRADE_AGENT_ID,role("__damaged__")))
     ->END if any_damage is None
     grid_repair_grid_objects(UPGRADE_AGENT.host_id, any_damage.id, UPGRADE_AGENT_ID)
+    signal_emit(signal_system_nodes_repair_changed(UPGRADE_AGENT.host_id), data={"SHIP_ID": UPGRADE_AGENT.host_id, "GRID_OBJECT_IDS": [any_damage.id]})
+    
     # grid_damcons_handle_idling_boost_finish(UPGRADE_AGENT)
     # Remove work order
     unlink(UPGRADE_AGENT_ID, "work-order", any_damage.id)
