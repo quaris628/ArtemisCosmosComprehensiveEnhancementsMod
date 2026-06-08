@@ -3,11 +3,10 @@ from enum import Enum
 from sbs_utils.mast.label import label
 from sbs_utils.procedural.execution import END, get_variable, set_variable
 from sbs_utils.procedural.grid import grid_objects
-from sbs_utils.procedural.gui import gui_blank, gui_row, gui_text
+from sbs_utils.procedural.gui import gui_blank, gui_represent, gui_row, gui_text
 from sbs_utils.procedural.roles import has_role, has_roles, all_roles, role
 from sbs_utils.procedural.signal import signal_register
 
-from data.missions.common.library_function_patches import gui_represent_patched
 from data.missions.common.common_signals import signal_system_nodes_repair_changed, signal_heat_pool_system_nodes_repair_changed, signal_all_system_nodes_repair_changed
 from data.missions.common.gui_color_scheme import color_text, color_text_secondary, color_background_secondary_opaque, color_divider, color_divider_secondary
 
@@ -80,7 +79,7 @@ def _repair_levels_display_on_all_system_nodes_repair_changed():
             repair_percentage_text = repair_display_gui_elements[system]
             repair_percentage_text.background = RepairLevel.NOMINAL.get_background_color()
             repair_percentage_text.value = "100%"
-            gui_represent_patched(repair_percentage_text)
+            gui_represent(repair_percentage_text)
     
     yield END()
 
@@ -92,7 +91,7 @@ def _update_repair_levels_display_for_systems(ship_id, affected_systems):
         repair_percentage_text = repair_display_gui_elements[system]
         repair_percentage_text.background_color = repair_level.get_background_color()
         repair_percentage_text.value = repair_percentage_str
-        gui_represent_patched(repair_percentage_text)
+        gui_represent(repair_percentage_text)
 
 def _get_repair_percentage_str_and_repair_level(all_system_grid_object_ids, system):
     system_grid_object_ids = all_system_grid_object_ids & all_roles(system.value)
