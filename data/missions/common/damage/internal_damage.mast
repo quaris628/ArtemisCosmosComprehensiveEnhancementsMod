@@ -6,8 +6,9 @@ grid_set_grid_current_theme(GRID_THEME_INDEX )
 
 //damage/heat
     grid_damage_system(DAMAGE_ORIGIN_ID, int(EVENT.sub_tag))
-
-
+    
+    if has_role(DAMAGE_ORIGIN_ID, "__player__") or has_role(DAMAGE_ORIGIN_ID, "cockpit"):
+        signal_emit(signal_heat_pool_system_nodes_repair_changed(DAMAGE_ORIGIN_ID), data={"SHIP_ID": DAMAGE_ORIGIN_ID, "HEAT_POOL_ID": int(EVENT.sub_tag)})
 
 //damage/internal
     # This called when there is damage being taken internally
@@ -19,8 +20,10 @@ grid_set_grid_current_theme(GRID_THEME_INDEX )
     source_point = EVENT.source_point
     damage_amount = EVENT.sub_float
     grid_take_internal_damage_at(DAMAGE_ORIGIN_ID, source_point, system_hit, damage_amount)
-
-
-
-
-
+    
+    if has_role(DAMAGE_ORIGIN_ID, "__player__") or has_role(DAMAGE_ORIGIN_ID, "cockpit"):
+        # It would be nice to optimize this by getting which nodes were damaged
+        # and only refreshing those systems. But the info required is buried
+        # pretty deep inside grid_take_internal_damage_at of sbs_utils, which
+        # would be difficult to refactor.
+        signal_emit(signal_all_system_nodes_repair_changed(DAMAGE_ORIGIN_ID), data={"SHIP_ID": DAMAGE_ORIGIN_ID, "IS_RESET_TO_ALL_NOMINAL": False})
