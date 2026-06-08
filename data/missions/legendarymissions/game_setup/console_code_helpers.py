@@ -49,6 +49,18 @@ def prepare_console(console_identifier, rerun_label=None, widget_list=None, enab
             sbs.assign_client_to_ship(client_id, game_setup_assigned_ship.spawned_ship_id)
             unlink(engine_assigned_ship_id, "consoles", client_id)
         link(game_setup_assigned_ship.spawned_ship_id, "consoles", client_id)
+        
+        # We need to ensure the alt-ship assignment (which indicates selected
+        # things on the 2d map view for a few different consoles) is cleared, to
+        # prevent a bug when switching between gamemaster and helm, weapons, or
+        # anything with a 2d map, in which the helm/weapons/etc map view would be
+        # centered on the gamemaster ship or the current science or comms target.
+        sbs.assign_client_to_alt_ship(client_id, 0)
+        set_inventory_value(client_id, "2dview_alt_ship", 0)
+        set_inventory_value(game_setup_assigned_ship.spawned_ship_id, "2dview_alt_ship", 0)
+        set_inventory_value(client_id, "science_2dview_alt_ship", 0)
+        set_inventory_value(game_setup_assigned_ship.spawned_ship_id, "science_2dview_alt_ship", 0)
+        set_inventory_value(client_id, "science_2dview_alt_ship_prev", 0)
     
     # This is read from in the upgrade tab and some gamemaster comms stuff
     # I believe it should be set to the currently-open screen on the client
