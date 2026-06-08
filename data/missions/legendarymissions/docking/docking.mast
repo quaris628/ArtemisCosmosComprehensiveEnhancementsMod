@@ -172,6 +172,7 @@ distance: 600
             count = min(len(system_grid_objects), interior_count)
             grid_repair_grid_objects(player_id, system_grid_objects[:count])
             
+            signal_emit(signal_system_nodes_repair_changed(DOCKING_PLAYER_ID), data={"SHIP_ID": DOCKING_PLAYER_ID, "GRID_OBJECT_IDS": system_grid_objects[:count]})
         else:
             #
             # Repair hallways and non system rooms
