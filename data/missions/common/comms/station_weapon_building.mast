@@ -62,12 +62,21 @@ shared surrender_color = "yellow"
     emp = get_data_set_value(COMMS_SELECTED_ID, "EMP_NUM", 0)
     mine = get_data_set_value(COMMS_SELECTED_ID, "Mine_NUM", )
     build_time = format_time_remaining(COMMS_SELECTED_ID, "build_time")
-
+    
+    hypothetical_dock_attempt_result = test_player_capital_ship_dock(COMMS_ORIGIN_ID, COMMS_SELECTED_ID, ignore_enemy_nearby=True)
+    docking_permissions_status = get_docking_permissions_status_message(hypothetical_dock_attempt_result)
+    if is_dock_attempt_result_allowed(hypothetical_dock_attempt_result):
+        ready_to_assist_message = "We stand ready to assist."
+        ordinance_permissions_status = get_ordinance_permissions_status_message(COMMS_ORIGIN_ID, COMMS_SELECTED_ID)
+    else:
+        ready_to_assist_message = ""
+        ordinance_permissions_status = ""
+    
     <<[green] "Hail"
-        " Hello, {comms_id}.  We stand ready to assist.
+        " Hello, {comms_id}. {ready_to_assist_message}
         " ^Our shields are at {s_cur} / {s_max} ({s_per} %).
         " ^Structural integrity is {a_cur} / {a_max} ({a_per} %).
-        " ^You have full docking privileges.
+        " ^{docking_permissions_status} {ordinance_permissions_status}
         " ^^{torpedo_build_type} in production. Completion in {build_time}
         " ^{"type":<10}{"ready": >5}{"time to produce": >20}
         " ^{"Homing": <10}{homing: >5}{"": >16}{station_build_times["Homing"]}:00 
@@ -83,8 +92,12 @@ shared surrender_color = "yellow"
     ship_id = COMMS_ORIGIN_ID
     station_obj = to_object(COMMS_SELECTED_ID)
     ->END if station_obj is None
-
-
+    
+    if not can_command_to_build_weapons(COMMS_ORIGIN_ID, COMMS_SELECTED_ID):
+        comms_receive(f"We don't follow your orders, {comms_id}. Request denied.", title="Build request denied", title_color=station_color)
+        comms_navigate("")
+        yield fail
+    
     if build_munition_queue_task(station_id, build_type):
         comms_receive(f"""We read you, {comms_id}.  We will focus on {weapon_text} production.^""", title=f"build {weapon_text}", title_color=station_color)
     else:
@@ -127,7 +140,9 @@ shared surrender_color = "yellow"
         COMMS_ORIGIN_ID = player
         ship_obj = to_object(player)
         continue if ship_obj is None
-
+        if not can_command_to_build_weapons(COMMS_ORIGIN_ID, COMMS_SELECTED_ID):
+            continue
+        
         comms_id = ship_obj.name
         comms_receive(f"""{comms_id}. {torp_name} Production complete.""", title=f"""{torp_name} complete.""", title_color=station_color)
 
