@@ -1,0 +1,19 @@
+
+//enable/comms if (COMMS_SELECTED_ID == COMMS_ORIGIN_ID) and has_roles(COMMS_SELECTED_ID, '__player__') and can_loot(COMMS_SELECTED_ID)
+    #lifeform_spawn("Boarding Parties", random_terran(civilian=False), "tsn, boarding_parties", COMMS_SELECTED_ID, path="//comms/boarding_parties", title_color=looting_comms_messages_color())
+
+//comms if COMMS_SELECTED_ID == COMMS_ORIGIN_ID and has_roles(COMMS_ORIGIN_ID, '__PLAYER__') and can_loot(COMMS_ORIGIN_ID)
+    +"Boarding Parties" //comms/boarding_parties
+
+//comms/boarding_parties if COMMS_SELECTED_ID == COMMS_ORIGIN_ID and has_roles(COMMS_ORIGIN_ID, '__PLAYER__') and can_loot(COMMS_ORIGIN_ID)
+    +"Back" //comms
+    
+    +"Plunder at will!":
+        set_auto_looting(COMMS_ORIGIN_ID, True)
+        comms_receive("We'll loot any ship near enough to board!", title="Boarding Parties Plundering", title_color=looting_comms_messages_color())
+        comms_navigate("//comms")
+    
+    +"Hold off":
+        set_auto_looting(COMMS_ORIGIN_ID, False)
+        comms_receive("If you insist... We won't plunder unless you command a ship be boarded.", title="Boarding Parties Holding", title_color=looting_comms_messages_color())
+        comms_navigate("//comms")

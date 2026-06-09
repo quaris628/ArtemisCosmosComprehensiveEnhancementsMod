@@ -29,6 +29,15 @@ def _inventory_key_is_looted():
 def looting_comms_messages_color():
     return get_shared_variable("surrender_color", "#ff0")
 
+def set_auto_looting(player_ship_id, auto_loot):
+    set_inventory_value(player_ship_id, _inventory_key_is_not_auto_looting(), not auto_loot)
+
+def is_auto_looting(player_ship_id):
+    return not get_inventory_value(player_ship_id, _inventory_key_is_not_auto_looting())
+
+def _inventory_key_is_not_auto_looting():
+    return "is_not_auto_looting"
+
 # ----- "side" definitions -----
 # TODO update implementations when ship sides get more fleshed out in vanilla?
 
