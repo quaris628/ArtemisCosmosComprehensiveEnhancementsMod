@@ -1,0 +1,205 @@
+
+# "constants"
+pirate_side_quest_players_side = "tsn" # would need to change if player ships are not on the TSN side
+pirate_side_quest_color = "lime"
+# see section in query_pirate_side_quest for reward mechanics
+pirate_side_quest_possible_rewards = ["800 energy", "2 nukes", "extra engineering coolant", "enhanced shield generators"]
+
+
+# "globals"
+
+pirate_side_quests = {}
+ # key: quest_id, value: {
+ #   "start_npc_id": ship or station id
+ #   "finish_npc_id": ship or station id
+ #   "reward_index": index of pirate_side_quest_possible_rewards
+ #   "is_picked_up": boolean
+ #   "picked_up_by_player_id": id of player that started the quest; only set when is_picked_up is True
+ # }
+pirate_side_quest_next_id = 0
+pirate_side_quest_npc_index = {} # key: ship or station id, value: quest_id set
+
+shared _deal_out_pirate_side_quests = task_schedule(deal_out_pirate_side_quests)
+shared _advance_pirate_side_quests = task_schedule(advance_pirate_side_quests)
+
+
+======== deal_out_pirate_side_quests  =========
+
+await delay_sim(240) # artemis 2.8 gives side quests roughly every 4 minutes
+
+stations_friendly = to_object_list(all_roles(pirate_side_quest_players_side + ", station") - role("pirate"))
+ships_friendly = to_object_list(all_roles(pirate_side_quest_players_side + ", friendly") - role("pirate"))
+total_num_npcs = len(stations_friendly) + len(ships_friendly)
+
+if total_num_npcs > 1:
+    
+    # randomly pick distinct start and finish npcs
+    start_npc_index = random.randint(0, total_num_npcs - 1)
+    finish_npc_index = random.randint(0, total_num_npcs - 2)
+    if start_npc_index <= finish_npc_index:
+        finish_npc_index += 1
+    if start_npc_index < len(stations_friendly):
+        start_npc = stations_friendly[start_npc_index]
+    else:
+        start_npc = ships_friendly[start_npc_index - len(stations_friendly)]
+    if finish_npc_index < len(stations_friendly):
+        finish_npc = stations_friendly[finish_npc_index]
+    else:
+        finish_npc = ships_friendly[finish_npc_index - len(stations_friendly)]
+    
+    # randomly pick benefit
+    reward_index = random.randint(0, len(pirate_side_quest_possible_rewards) - 1)
+    reward_name = pirate_side_quest_possible_rewards[reward_index]
+    
+    # save to dicts
+    side_quest_dict = {}
+    side_quest_dict["start_npc_id"] = start_npc.id
+    side_quest_dict["finish_npc_id"] = finish_npc.id
+    side_quest_dict["reward_index"] = reward_index
+    side_quest_dict["is_picked_up"] = False
+    pirate_side_quests[pirate_side_quest_next_id] = side_quest_dict
+    if start_npc.id not in pirate_side_quest_npc_index.keys():
+        pirate_side_quest_npc_index[start_npc.id] = {pirate_side_quest_next_id}
+    else:
+        quest_id_set = pirate_side_quest_npc_index[start_npc.id]
+        quest_id_set.add(pirate_side_quest_next_id)
+    if finish_npc.id not in pirate_side_quest_npc_index.keys():
+        pirate_side_quest_npc_index[finish_npc.id] = {pirate_side_quest_next_id}
+    else:
+        quest_id_set = pirate_side_quest_npc_index[finish_npc.id]
+        quest_id_set.add(pirate_side_quest_next_id)
+    
+    pirate_side_quest_next_id += 1
+    
+    # broadcast message to all players (that are on the same side)
+    if start_npc_index < len(stations_friendly) and finish_npc_index < len(stations_friendly):
+        excuse_to_not_directly_transport = "" # two stations; no need for an excuse.
+    elif sbs.distance_id(start_npc.id, finish_npc.id) > 5000:
+        excuse_to_not_directly_transport = ", but we can't rendezvous anytime soon"
+    else:
+        excuse_to_not_directly_transport = ", but we're experiencing transporter malfunctions"
+    quest_message_title = f"Ransom opportunity - {start_npc.name} to {finish_npc.name}"
+    quest_message = f"We intercepted this secret {pirate_side_quest_players_side} broadcast:\n\"{finish_npc.name} to all {pirate_side_quest_players_side} ships. We need sensitive supplies from {start_npc.name}{excuse_to_not_directly_transport}. Can anyone transport them for us? We'd give you {reward_name} for your trouble.\"\n\nThose supplies may not be of use to us, but we could hold them ransom for {reward_name}!"
+    
+    #COMMS_SELECTED_ID = finish_npc.id
+    for player_id in role("__player__") - role("exploded"):
+        continue if not is_pirate(player_id)
+        ship_obj = to_object(player_id)
+        continue if ship_obj is None
+        COMMS_ORIGIN_ID = player_id
+        
+        #if to_object(COMMS_ORIGIN_ID) is None or to_object(COMMS_SELECTED_ID) is None:
+        #    x = 1 / 0 # intentionally crash here, where I know the line number
+        comms_receive_internal(quest_message, title=quest_message_title, title_color=pirate_side_quest_color)
+
+jump deal_out_pirate_side_quests
+
+
+===== advance_pirate_side_quests =======
+
+await delay_sim(4)
+
+alive_player_ids = role(f"__player__") - role("exploded")
+
+# avoid concurrent modification
+# parallel arrays
+start_npc_ids_to_pop = []
+start_npc_quest_ids_to_pop = []
+# parallel arrays
+finish_npc_ids_to_pop = []
+finish_npc_quest_ids_to_pop = []
+
+for quest_id in pirate_side_quests:
+    quest_dict = pirate_side_quests[quest_id]
+    start_npc_id = quest_dict["start_npc_id"]
+    finish_npc_id = quest_dict["finish_npc_id"]
+    # start_npc isn't needed
+    finish_npc_obj = to_object(finish_npc_id)
+    
+    # if quest hasn't been started
+    if not quest_dict["is_picked_up"]:
+        start_npc_obj = to_object(start_npc_id)
+        if start_npc_obj is None or finish_npc_obj is None: # was either npc killed?
+            start_npc_ids_to_pop.append(start_npc_id)
+            start_npc_quest_ids_to_pop.append(quest_id)
+            finish_npc_ids_to_pop.append(finish_npc_id)
+            finish_npc_quest_ids_to_pop.append(quest_id)
+            continue
+        
+        # check for any nearby same-side player
+        closest_player_distance = 501
+        for player_id in alive_player_ids:
+            continue if not is_pirate(player_id)
+            player_distance = sbs.distance_id(player_id, start_npc_id)
+            # if two ships are in the area, pick the closest one
+            if player_distance < closest_player_distance:
+                closest_player_distance = player_distance
+                closest_player_id = player_id
+        # TODO when docking scripts get figured out, trigger all sidequests immediately upon docking (instead of waiting 5 seconds for this function to check for it)
+        if closest_player_distance <= 500: # and (player_blob.get("dock_state") == "docked" or not has_role(finish_npc_id, "station")):
+            player_obj = to_object(closest_player_id)
+            
+            # pick up the supplies from the start npc
+            quest_dict["is_picked_up"] = True
+            quest_dict["picked_up_by_player_id"] = closest_player_id
+            
+            reward_name = pirate_side_quest_possible_rewards[quest_dict["reward_index"]]
+            quest_message = f"{player_obj.name}, you pirate scum! That's not yours! Those supplies belong to {finish_npc_obj.name}!"
+            
+            COMMS_SELECTED_ID = start_npc_id
+            COMMS_ORIGIN_ID = closest_player_id
+            comms_receive(quest_message, title="Supplies stolen", title_color=pirate_side_quest_color)
+            
+            start_npc_ids_to_pop.append(start_npc_id)
+            start_npc_quest_ids_to_pop.append(quest_id)
+    
+    # if quest has already been picked up, (but not dropped off)
+    else:
+        # we only care about the en-route player
+        player_id = quest_dict["picked_up_by_player_id"]
+        player_blob = to_blob(player_id)
+        
+        if finish_npc_obj is None or player_blob is None: # was finish npc or player killed?
+            finish_npc_ids_to_pop.append(finish_npc_id)
+            finish_npc_quest_ids_to_pop.append(quest_id)
+            continue
+        
+        # TODO when docking scripts get figured out, trigger all sidequests immediately upon docking (instead of waiting 5 seconds for this function to check for it)
+        elif sbs.distance_id(player_id, finish_npc_id) <= 500: # and (player_blob.get("dock_state") == "docked" or not has_role(finish_npc_id, "station")):
+            # drop off the supplies and collect reward
+            reward_index = quest_dict["reward_index"]
+            
+            if reward_index == 0: # 800 energy
+                player_blob.set("energy", 800 + player_blob.get("energy", 0), 0)
+            elif reward_index == 1: # 2 nukes
+                player_blob.set("Nuke_NUM", 2 + player_blob.get("Nuke_NUM", 0), 0)
+            elif reward_index == 2: # extra engineering coolant (+2)
+                player_blob.set("system_coolant_available", 2 + player_blob.get("system_coolant_available", 0), 0)
+            elif reward_index == 3: # enhanced shield generators (+20% maximum shields)
+                for shield_index in range(player_blob.get("shield_count", 0)):
+                    player_blob.set("shield_max_val", 1.2 * player_blob.get("shield_max_val", shield_index), shield_index)
+            
+            
+            player_name = to_object(player_id).name
+            reward_name = pirate_side_quest_possible_rewards[reward_index]
+            quest_message = f"You can't just take what's ours, {player_name}! But we need what you've got, so we'll deal with you this time! Here's {reward_name}."
+            
+            COMMS_SELECTED_ID = finish_npc_id
+            COMMS_ORIGIN_ID = player_id
+            comms_receive(quest_message, title="Ransom paid", title_color=pirate_side_quest_color)
+            
+            finish_npc_ids_to_pop.append(finish_npc_id)
+            finish_npc_quest_ids_to_pop.append(quest_id)
+
+for npc_id in start_npc_ids_to_pop:
+    quest_id = start_npc_quest_ids_to_pop.pop(0)
+    start_npc_quest_id_set = pirate_side_quest_npc_index[npc_id]
+    start_npc_quest_id_set.remove(quest_id)
+
+for npc_id in finish_npc_ids_to_pop:
+    quest_id = finish_npc_quest_ids_to_pop.pop(0)
+    finish_npc_quest_id_set = pirate_side_quest_npc_index[npc_id]
+    finish_npc_quest_id_set.remove(quest_id)
+    pirate_side_quests.pop(quest_id)
+
+jump advance_pirate_side_quests
