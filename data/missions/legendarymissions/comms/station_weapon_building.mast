@@ -72,17 +72,21 @@ shared surrender_color = "yellow"
         ready_to_assist_message = ""
         ordinance_permissions_status = ""
     
-    <<[green] "Hail"
-        " Hello, {comms_id}. {ready_to_assist_message}
-        " ^Our shields are at {s_cur} / {s_max} ({s_per} %).
-        " ^Structural integrity is {a_cur} / {a_max} ({a_per} %).
-        " ^{docking_permissions_status} {ordinance_permissions_status}
-        " ^^{torpedo_build_type} in production. Completion in {build_time}
-        " ^{"type":<10}{"ready": >5}{"time to produce": >20}
-        " ^{"Homing": <10}{homing: >5}{"": >16}{station_build_times["Homing"]}:00 
-        " ^{"Nuke": <10}{nuke: >5}{"": >16}{station_build_times["Nuke"]}:00
-        " ^{"EMP": <10}{emp: >5}{"": >16}{station_build_times["EMP"]}:00
-        " ^{"Mine": <10}{mine: >5}{"": >16}{station_build_times["Mine"]}:00
+    message_lines = ~~[
+        f"Hello, {comms_id}. {ready_to_assist_message}",
+        f"Our shields are at {s_cur} / {s_max} ({s_per} %).",
+        f"Structural integrity is {a_cur} / {a_max} ({a_per} %).",
+        f"{docking_permissions_status} {ordinance_permissions_status}",
+        "",
+        f"{torpedo_build_type} in production. Completion in {build_time}",
+        f"{'type':<10}{'ready': >5}{'time to produce': >20}",
+        f"{'Homing': <10}{homing: >5}{'': >16}{station_build_times['Homing']}:00",
+        f"{'Nuke': <10}{nuke: >5}{'': >16}{station_build_times['Nuke']}:00",
+        f"{'EMP': <10}{emp: >5}{'': >16}{station_build_times['EMP']}:00",
+        f"{'Mine': <10}{mine: >5}{'': >16}{station_build_times['Mine']}:00"
+    ]~~
+    comms_receive("\n".join(message_lines), title="Hail", title_color="green")
+    
     yield success
 
 
