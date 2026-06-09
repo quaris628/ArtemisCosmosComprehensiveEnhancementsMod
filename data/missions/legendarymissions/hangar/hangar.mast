@@ -316,6 +316,9 @@ hangar_get_craft_data("tsn")
         # gui_row("row-height: 100px;")
         # gui_layout_widget("text_waterfall")
     
+    gui_section(style="area:10px,450px,160px,100;")
+    create_repair_levels_display(craft_id)
+    
     # Right column
     gui_section(style="area:100-140px,46px,100-10px,75;")
     
