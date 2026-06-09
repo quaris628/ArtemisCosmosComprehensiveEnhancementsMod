@@ -26,6 +26,8 @@ import sbs
 
 from data.missions.common.gui_color_scheme import color_text, color_background_title
 from data.missions.common.gui_switching import gui_switch_to
+from data.missions.common.pirate_features_definitions import is_pirate
+from data.missions.common.docking_permissions import dock_attempt_result_allowed_always_welcome, test_player_capital_ship_dock
 
 _craft_id = 1
 
@@ -508,11 +510,28 @@ def hangar_filter_valid_dock_ids(craft_ship_id, space_object_ids):
         return {}
     
     dockable_ids = set()
+    is_craft_pirate = is_pirate(craft_ship_id)
     for dock_id in space_object_ids:
-        if is_potential_valid_dock(dock_id) and has_role(dock_id, craft_ship_object.side):
+        if hangar_can_craft_dock_at(craft_ship_object, dock_id, is_craft_pirate=is_craft_pirate):
             dockable_ids.add(dock_id)
     
     return dockable_ids
+
+def hangar_can_craft_dock_at(craft_object, dock_id, is_craft_pirate=None):
+    """
+    Returns True if the given player-piloted single-seat craft can dock at the given location.
+    Otherwise, returns False.
+    """
+    if not is_potential_valid_dock(dock_id):
+        return False
+    home_dock_id = hangar_get_dock(craft_object)
+    if home_dock_id == dock_id:
+        return True
+    elif has_role(home_dock_id, "__player__") and not has_role(dock_id, "__player__"):
+        home_dock_permissions = test_player_capital_ship_dock(home_dock_id, dock_id, ignore_enemy_nearby=True)
+        return home_dock_permissions == dock_attempt_result_allowed_always_welcome()
+    else: # home dock is a station, or is a player and the other potential dock location is also a player
+        return has_role(dock_id, craft_object.side) and is_pirate(dock_id) == (is_craft_pirate if is_craft_pirate is not None else is_pirate(craft_object.id))
 
 def hangar_get_crafts_at(dock_id):
     """
