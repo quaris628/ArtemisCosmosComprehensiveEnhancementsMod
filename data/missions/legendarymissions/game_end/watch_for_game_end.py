@@ -1,6 +1,10 @@
-
+from sbs_utils.procedural.comms import comms_broadcast
 from sbs_utils.procedural.execution import get_shared_variable, set_shared_variable
 from sbs_utils.procedural.roles import has_role, has_roles, role, all_roles
+
+from data.missions.common.pirate_features_definitions import can_loot, is_looted
+
+from data.missions.legendarymissions.comms.surrendered_navigation import is_close_enough_to_spawnpoint_for_deletion, is_a_player_too_close_for_deletion
 
 # ----- Misc -----
 
@@ -11,6 +15,44 @@ def get_all_enemy_ids(except_enemy_id=None):
     all_enemy_ids = role("raider") | all_roles("enemy,station")
     all_enemy_ids.discard(except_enemy_id)
     return all_enemy_ids
+
+def wait_for_looting():
+    """
+    Checks whether the simulation should wait to end in order
+    to allow player ships to loot surrendered ships.
+    
+    More precisely, returns True when all of the following are true:
+    1) There is at least one non-destroyed player ship that can loot
+    2) There is at least one unlooted surrendered ship that is NOT in
+       a state where it would be deleted if it were at its spawnpoint.
+    
+    Returns:
+        boolean: True if we need to wait to end the game;
+            False if the game can end immediately.
+    """
+    is_looter_player_in_play = False
+    for player_ship_id in role("__player__"):
+        if can_loot(player_ship_id):
+            is_looter_player_in_play = True
+            break
+    if not is_looter_player_in_play:
+        return False
+    
+    unlooted_ship_in_play = False
+    for ship_id in role("surrendered"):
+        if is_looted(ship_id):
+            continue
+        if is_close_enough_to_spawnpoint_for_deletion(ship_id) and not is_a_player_too_close_for_deletion(ship_id):
+            continue
+        unlooted_ship_in_play = True
+        break
+    if not unlooted_ship_in_play:
+        print(f"wait_for_looting not unlooted_ship_in_play")
+        return False
+    
+    for player_ship_id in role("__player__"):
+        comms_broadcast(player_ship_id, msg="Mission is won! Waiting 60s to allow looting.", color="lime")
+    return True
 
 # ----- Setter/getter wrappers -----
 

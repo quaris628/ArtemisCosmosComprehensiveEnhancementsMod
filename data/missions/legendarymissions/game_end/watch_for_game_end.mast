@@ -68,6 +68,11 @@ signal_register(signal_after_player_ship_destroyed(), watch_for_game_end_after_p
     ->END
 
 ==== watch_for_game_end_end_bc_no_enemies ====
+    if wait_for_looting():
+        await delay_sim(45)
+        for player_id in role("__player__"):
+            comms_broadcast(player_id, msg=f"15 seconds remaining", color="lime")
+        await delay_sim(15)
     GAME_STATISTICS = get_game_statistics()
     GAME_STATISTICS.record_game_end(reason="all enemies have been defeated.", is_success=True)
     end_game()

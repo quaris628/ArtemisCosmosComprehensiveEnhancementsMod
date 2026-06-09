@@ -3,6 +3,7 @@ import ../../common/model_game_statistics.py
 import ../../common/common_signals.py
 
 #import ../game_setup/controller_game_setup_data.py
+import ../comms/surrendered_navigation.py
 
 import watch_for_game_end.py
 import watch_for_game_end.mast
