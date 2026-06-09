@@ -83,7 +83,11 @@ elite_build_abilities()
     else:
         print(f"Picked {ab}")
         await delay_sim(seconds=30)
-
+    
+    if has_surrendered(ELITE_ID):
+        task_schedule(elite_update_science_status, {"ELITE_ID": ELITE_ID, "status": "Inactive"})
+        ->END
+    
     # Add at least on delay
     await delay_sim(seconds=1)
     -> handle_elite_abilities
