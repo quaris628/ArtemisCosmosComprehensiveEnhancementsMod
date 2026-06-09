@@ -51,6 +51,8 @@ prefab_spawn(prefab_lifeform_generic, {"name": "TSNN", "path": "//comms/tsnn"})
 
 
 //enable/comms if has_roles(COMMS_SELECTED_ID, '__PLAYER__') and (COMMS_SELECTED_ID == COMMS_ORIGIN_ID)
+    if can_loot(COMMS_ORIGIN_ID):
+        lifeform_spawn("Boarding Parties", random_terran(civilian=False), "tsn, boarding_parties", COMMS_SELECTED_ID, path="//comms/internal/boarding_parties", title_color=looting_comms_messages_color())
     lifeform_spawn("Sickbay", random_terran(civilian=False), "tsn, sickbay",COMMS_SELECTED_ID, path="//comms/internal/sickbay", title_color="blue")
     lifeform_spawn("Security", random_terran(civilian=False), "tsn, security",COMMS_SELECTED_ID, path="//comms/internal/security", title_color="#b00")
     lifeform_spawn("Exobiology", random_terran(civilian=False), "tsn, exobiology",COMMS_SELECTED_ID, path="//comms/internal/exobiology", title_color="cyan")
@@ -185,6 +187,19 @@ prefab_spawn(prefab_lifeform_generic, {"name": "TSNN", "path": "//comms/tsnn"})
             << "Recalibrate Beams"
                 % Primary beam refocused, sir!
 
+//comms/internal/boarding_parties if COMMS_SELECTED_ID == COMMS_ORIGIN_ID and has_roles(COMMS_ORIGIN_ID, '__PLAYER__') and can_loot(COMMS_ORIGIN_ID)
+    +"Back" //comms/comms_badge
+    +"Stay your greedy fingers, we've got enough loot! " if is_auto_looting(COMMS_ORIGIN_ID):
+        set_auto_looting(COMMS_ORIGIN_ID, False)
+        with comms_override(COMMS_ORIGIN_ID, COMMS_LIFEFORM_ID):
+            << "Holding"
+                "If you insist... We won't plunder no more, unless you command a ship be boarded.
+
+    +"Raid, pillage, and plunder your weasly black guts out!" if not is_auto_looting(COMMS_ORIGIN_ID):
+        set_auto_looting(COMMS_ORIGIN_ID, True)
+        with comms_override(COMMS_ORIGIN_ID, COMMS_LIFEFORM_ID):
+            << "Plundering"
+                "No need to tell us twice! We'll loot any ship near enough to board!
 
 
 ====== test_finished ======
