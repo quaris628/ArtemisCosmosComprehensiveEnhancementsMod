@@ -18,6 +18,9 @@ from sbs_utils.procedural.terrain import terrain_to_value
 from sbs_utils.procedural.timers import delay_app, set_timer
 
 from data.missions.common.controller_vessel_types_data import get_vessel_types_data
+from data.missions.common.pirate_features_definitions import is_pirate
+
+from data.missions.legendarymissions.game_end.watch_for_game_end import set_game_end_conditions
 
 from model_console_slot import ConsoleSlot
 from model_player_ship_setup_data import PlayerShipSetupData
@@ -164,6 +167,7 @@ def setup_game():
     extra_scan_sources_schedule()
     
     # Player ships
+    is_at_least_one_player_ship_a_pirate = False
     for ship_number in range(1, GAME_SETUP_DATA.player_ship_count + 1):
         player_ship_setup_data = GAME_SETUP_DATA.get_player_ship_by_number(ship_number)
         player_ship_type = VESSEL_TYPES_DATA.get_ship_type_from_key(player_ship_setup_data.ship_type_key)
@@ -193,12 +197,18 @@ def setup_game():
         player_ship_setup_data.spawned_ship_id = player_ship_spawn_data.id
         
         signal_emit(signal_player_ship_created(), data={"PLAYER_SHIP_ID": player_ship_spawn_data.id})
+        
+        is_at_least_one_player_ship_a_pirate = is_at_least_one_player_ship_a_pirate or is_pirate(player_ship_setup_data.spawned_ship_id)
     
     #sbs.assign_client_to_ship(0, GAME_SETUP_DATA.get_player_ship_by_number(1).spawned_ship_id)
     
     # TODO Is this necessary? (Do some custom mission scripts use it?)
     #signal_emit("create_player_ships", None)
     
+    if is_at_least_one_player_ship_a_pirate:
+        # This default can be overridden by calling the
+        # same function later in the map-specific code
+        set_game_end_conditions(end_if_no_ally_stations=False)
     for map_obj in maps_get_list():
         if map_obj.path == GAME_SETUP_DATA.map_identifier:
             set_variable("WORLD_SELECT", map_obj)
