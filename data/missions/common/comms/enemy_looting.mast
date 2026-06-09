@@ -45,7 +45,12 @@
             continue
         elif player_ship_object.id not in rendezvous_counters:
             # rendezvous is starting
-            new_rendezvous_counters[player_ship_object.id] = 0
+            if is_prepared_for_boarding_by(SURRENDERED_SHIP_ID, player_ship_object.id):
+                # Only give a head start for ships that take ~4s or more to loot
+                starting_loot_counter = max(0, 0.75 * approx_seconds_required_to_loot - 2)
+            else:
+                starting_loot_counter = 0
+            new_rendezvous_counters[player_ship_object.id] = starting_loot_counter
         else:
             # rendezvous is progressing
             new_rendezvous_counters[player_ship_object.id] = rendezvous_counters[player_ship_object.id] + 1
