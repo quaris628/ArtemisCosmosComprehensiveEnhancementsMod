@@ -42,7 +42,7 @@ signal_register(signal_after_player_ship_destroyed(), watch_for_game_end_after_p
     tsn_station_ids = all_roles("tsn,station")
     tsn_station_ids.discard(DESTROYED_ID)
     if len(tsn_station_ids) == 0:
-        GAME_STATISTICS.record_game_end(reason="all your base are belong to us.", is_success=False)
+        GAME_STATISTICS.record_game_end(reason="all allied bases have been destroyed.", is_success=False)
         end_game()
     ->END
 
