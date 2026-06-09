@@ -5,6 +5,7 @@ import ../../common/q_logger.py
 import ../../common/procedural_internal_damage.py
 import ../../common/gui_color_scheme.py
 import ../../common/gui_repair_levels_display.py
+import ../../common/pirate_features_definitions.py
 
 import ../game_setup/console_code_helpers.py
 
