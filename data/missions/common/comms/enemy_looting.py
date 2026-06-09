@@ -4,6 +4,8 @@ from sbs_utils.procedural.execution import set_variable
 
 from data.missions.common.pirate_features_definitions import is_looted, set_looted, looting_comms_messages_color
 
+from surrendered_navigation import clear_all_prepared_for_boarding
+
 def loot(looted_ship_object, looted_by_player_ship_object):
     """
     Does everything that needs to happen whenever a player ship loots a
@@ -23,6 +25,7 @@ def loot(looted_ship_object, looted_by_player_ship_object):
     if is_looted(looted_ship_object.id):
         return
     set_looted(looted_ship_object.id)
+    clear_all_prepared_for_boarding(looted_ship_object.id)
     
     shield_max_avg = get_average_max_shields(looted_ship_object.data_set)
     # Maybe also scale loot w/ difficulty? Or a slider in server settings? (idea for later)
