@@ -10,6 +10,8 @@ from sbs_utils.procedural.execution import task_schedule, task_cancel
 from sbs_utils.procedural.space_objects import target_pos
 
 from data.missions.common.distance_utils import broad_test_around_position, is_distance_closer_than_or_equal_to
+from data.missions.common.pirate_features_definitions import is_looted
+
 
 # ----- Gameplay constants -----
 # Change these to tweak gameplay balance
@@ -84,6 +86,7 @@ def command_go_on_your_way(surrendered_ship_id, commanded_by_ship_id):
     else: # stopped / going to location / following ship
         _set_nav_state(surrendered_ship_id, commanded_by_ship_id, nav_state_to_spawnpoint_no_deletion())
     
+    set_prepared_for_boarding(surrendered_ship_id, commanded_by_ship_id, False)
     _navigate_to(surrendered_ship_id, surrendered_ship_object.spawn_pos, throttle=1.5)
     return True
 
@@ -189,6 +192,46 @@ def nav_follow_ship(surrendered_ship_id, commanded_by_ship_id, target_ship_objec
     set_inventory_value(surrendered_ship_id, inventory_key_follow_ship_id(), target_ship_object.id)
     _navigate_to(surrendered_ship_id, target_ship_object.pos)
 
+def command_prepare_to_be_boarded(surrendered_ship_id, commanded_by_ship_id):
+    if not _try_nav_demand(surrendered_ship_id, commanded_by_ship_id):
+        _transition_to_running_away_if_going_to_spawnpoint(surrendered_ship_id, commanded_by_ship_id)
+        if is_looted(surrendered_ship_id):
+            return command_ptbb_outcome_already_looted_and_running_away()
+        else:
+            return command_ptbb_outcome_running_away()
+    elif is_looted(surrendered_ship_id):
+        return command_ptbb_outcome_already_looted()
+    elif is_prepared_for_boarding_by(surrendered_ship_id, commanded_by_ship_id):
+        return command_ptbb_outcome_already_prepared_for_boarding()
+    else: # success
+        # no direct change to nav state
+        # (might still be indirectly impacted by _try_nav_demand resetting
+        # the compliance timer)
+        set_prepared_for_boarding(surrendered_ship_id, commanded_by_ship_id, True)
+        return command_ptbb_outcome_success()
+
+# Assumes prepare to be boarded is a valid command (does not check)
+def set_prepared_for_boarding(surrendered_ship_id, commanded_by_ship_id, prepared_for_boarding):
+    prepared_for_boarding_by_ship_ids = get_inventory_value(surrendered_ship_id, inventory_key_prepared_for_boarding_by_ship_ids())
+    if prepared_for_boarding_by_ship_ids is None:
+        prepared_for_boarding_by_ship_ids = set()
+    
+    if prepared_for_boarding:
+        prepared_for_boarding_by_ship_ids.add(commanded_by_ship_id)
+        # if cloaked, uncloak
+        if get_inventory_value(surrendered_ship_id, "visible_art_id") is not None:
+            task_schedule("elite_cloak_clear", data={"BT_ID": surrendered_ship_id})
+        # if warping, stop warping
+        if get_inventory_value(surrendered_ship_id, "non_warp_speed_coeff") is not None:
+            task_schedule("elite_warp_clear", data={"BT_ID": surrendered_ship_id})
+    elif commanded_by_ship_id in prepared_for_boarding_by_ship_ids:
+        prepared_for_boarding_by_ship_ids.remove(commanded_by_ship_id)
+    
+    set_inventory_value(surrendered_ship_id, inventory_key_prepared_for_boarding_by_ship_ids(), prepared_for_boarding_by_ship_ids)
+
+def clear_all_prepared_for_boarding(surrendered_ship_id):
+    set_inventory_value(surrendered_ship_id, inventory_key_prepared_for_boarding_by_ship_ids(), None)
+
 # ----- private setters -----
 
 def _try_nav_demand(surrendered_ship_id, commanded_by_ship_id):
@@ -215,8 +258,10 @@ def _transition_to_running_away_if_going_to_spawnpoint(surrendered_ship_id, comm
     ok for the ship to be deleted).
     """
     if get_nav_state(surrendered_ship_id) == nav_state_to_spawnpoint_no_deletion():
+        set_prepared_for_boarding(surrendered_ship_id, commanded_by_ship_id, False)
         _set_nav_state(surrendered_ship_id, commanded_by_ship_id, nav_state_running_away_no_deletion())
     elif get_nav_state(surrendered_ship_id) == nav_state_to_spawnpoint_deletion_ok():
+        set_prepared_for_boarding(surrendered_ship_id, commanded_by_ship_id, False)
         _set_nav_state(surrendered_ship_id, commanded_by_ship_id, nav_state_running_away_deletion_ok())
 
 def _try_run_away(surrendered_ship_id, commanded_by_ship_id, skip_task_cancel=False):
@@ -249,6 +294,7 @@ def _try_run_away(surrendered_ship_id, commanded_by_ship_id, skip_task_cancel=Fa
     elif commanded_by_ship_id is None:
         return False
     elif is_compliant(surrendered_ship_id, commanded_by_ship_id)[0]:
+        set_prepared_for_boarding(surrendered_ship_id, commanded_by_ship_id, False)
         return False
     _set_nav_state(surrendered_ship_id, commanded_by_ship_id, nav_state_running_away_no_deletion(), skip_task_cancel=skip_task_cancel)
     # TODO: be smarter about routing; prioritize not getting close to the
@@ -462,6 +508,14 @@ def is_a_player_too_close_for_deletion(surrendered_ship_id):
     nearby_player_ships = broad_test_around_position(surrendered_ship_object.pos, player_prevents_deletion_taxicab_distance() * 2, player_prevents_deletion_taxicab_distance() * 2, 0x20)
     return len(nearby_player_ships) > 0
 
+def is_prepared_for_boarding(surrendered_ship_id):
+    prepared_for_boarding_by_ship_ids = get_inventory_value(surrendered_ship_id, inventory_key_prepared_for_boarding_by_ship_ids())
+    return prepared_for_boarding_by_ship_ids is not None and 0 < len(prepared_for_boarding_by_ship_ids)
+
+def is_prepared_for_boarding_by(surrendered_ship_id, commanded_by_ship_id):
+    prepared_for_boarding_by_ship_ids = get_inventory_value(surrendered_ship_id, inventory_key_prepared_for_boarding_by_ship_ids())
+    return prepared_for_boarding_by_ship_ids is not None and commanded_by_ship_id in prepared_for_boarding_by_ship_ids
+
 # ----- Technical Constants -----
 # Changing these won't impact gameplay
 
@@ -481,6 +535,18 @@ def nav_state_commanded_to_location():
 def nav_state_commanded_to_follow_ship():
     return "surr_nav_state_commanded_to_follow_ship"
 
+# prepare to be boarded command outcomes
+def command_ptbb_outcome_already_looted_and_running_away():
+    return -1
+def command_ptbb_outcome_running_away():
+    return -2
+def command_ptbb_outcome_already_looted():
+    return -3
+def command_ptbb_outcome_already_prepared_for_boarding():
+    return -4
+def command_ptbb_outcome_success():
+    return 0
+
 # inventory keys
 def inventory_key_nav_state():
     return "srnvst"
@@ -492,6 +558,9 @@ def inventory_key_to_location_xyz():
     return "srnv_to_xyz"
 def inventory_key_follow_ship_id():
     return "srnv_follow_ship"
+
+def inventory_key_prepared_for_boarding_by_ship_ids():
+    return "surrendered_nav_prepared_for_boarding_by_ship_ids"
 
 # timer keys
 def timer_key_distant_commands_grace_period(commanded_by_ship_id):
