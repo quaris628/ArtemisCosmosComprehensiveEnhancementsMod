@@ -1,3 +1,4 @@
+from sbs_utils.procedural.inventory import get_inventory_value, set_inventory_value
 from sbs_utils.procedural.roles import has_role
 from sbs_utils.procedural.links import get_dedicated_link
 
@@ -65,3 +66,13 @@ def get_player_single_seat_craft_attributed_to_damage(damage_source_id, damage_p
         return damage_parent_id
     else:
         return None
+
+# ----- getter/setter wrappers -----
+
+def set_already_sent_desperate_plea(npc_ship_id):
+    set_inventory_value(npc_ship_id, _INVENTORY_KEY_ALREADY_SENT_DESPERATE_PLEA, True)
+
+def has_already_sent_desperate_plea(npc_ship_id):
+    return get_inventory_value(npc_ship_id, _INVENTORY_KEY_ALREADY_SENT_DESPERATE_PLEA) is True
+
+_INVENTORY_KEY_ALREADY_SENT_DESPERATE_PLEA = "sent_desp_plea"

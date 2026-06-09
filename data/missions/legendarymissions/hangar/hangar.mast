@@ -327,6 +327,10 @@ hangar_get_craft_data("tsn")
     # https://github.com/artemis-sbs/LegendaryMissions/issues/513
     gui_blank(style="col-width:0px;")
     
+    if is_pirate(craft_id):
+        gui_row("row-height:80px;")
+        gui_text("Kills affect your mothership's reputation.", style=f"padding:5px,5px,5px,0px;color:{color_text()};background:{color_background()};")
+    
     gui_row("row-height:20px;")
     gui_blank()
     
