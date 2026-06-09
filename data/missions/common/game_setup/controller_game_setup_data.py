@@ -19,6 +19,11 @@ from sbs_utils.procedural.timers import delay_app, set_timer
 from data.missions.common.common_signals import signal_after_player_ship_destroyed, signal_before_player_ship_destroyed
 from data.missions.common.controller_vessel_types_data import get_vessel_types_data
 from data.missions.common.controller_game_statistics import get_game_statistics
+from data.missions.common.pirate_features_definitions import can_loot
+
+#from data.missions.legendarymissions.game_end.watch_for_game_end import set_game_end_conditions
+from sbs_utils.mast.mast_globals import MastGlobals
+set_game_end_conditions = MastGlobals.globals["set_game_end_conditions"]
 
 from game_state import signal_sim_created_for_game_start, signal_game_set_up_for_new
 from model_console_slot import ConsoleSlot
@@ -149,6 +154,7 @@ def setup_game():
     GAME_STATISTICS.record_game_start()
     
     # Player ships
+    is_at_least_one_player_ship_able_to_loot = False
     for ship_number in range(1, GAME_SETUP_DATA.player_ship_count + 1):
         player_ship_setup_data = GAME_SETUP_DATA.get_player_ship_by_number(ship_number)
         player_ship_type = VESSEL_TYPES_DATA.get_ship_type_from_key(player_ship_setup_data.ship_type_key)
@@ -180,10 +186,16 @@ def setup_game():
         GAME_STATISTICS.record_player_ship_added(ship_number, player_ship_spawn_data.id, player_ship_setup_data.ship_type_key, player_ship_setup_data.name)
         
         signal_emit(signal_player_ship_created(), data={"PLAYER_SHIP_ID": player_ship_spawn_data.id})
+        
+        is_at_least_one_player_ship_able_to_loot = is_at_least_one_player_ship_able_to_loot or can_loot(player_ship_setup_data.spawned_ship_id)
     
     # TODO Is this necessary? (Do some custom mission scripts use it?)
     #signal_emit("create_player_ships", None)
     
+    if is_at_least_one_player_ship_able_to_loot:
+        # This behavior can be overridden for specific maps by
+        # calling the same function later in the map-specific code
+        set_game_end_conditions(end_if_no_ally_stations=False)
     for map_obj in maps_get_list():
         if map_obj.path == GAME_SETUP_DATA.map_identifier:
             set_variable("WORLD_SELECT", map_obj)
