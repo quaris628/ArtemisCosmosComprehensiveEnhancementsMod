@@ -25,4 +25,5 @@ import enemy_looting.mast
 import priority_docking.mast
 import enemy_stations.mast
 import player_comms.mast
+import pirate_side_quests.mast
 
