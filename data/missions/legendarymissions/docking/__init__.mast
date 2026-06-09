@@ -1,4 +1,5 @@
 import ../../common/common_signals.py
+import ../../common/docking_permissions.py
 
 # Need to be first
 #import common_docking_old.py
