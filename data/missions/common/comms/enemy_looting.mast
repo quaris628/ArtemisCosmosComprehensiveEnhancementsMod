@@ -43,6 +43,8 @@
     for player_ship_object in get_space_objects_within_radius(surrendered_ship_object.pos, loot_rendezvous_radius(), broad_type = 0x20):
         if not can_loot(player_ship_object.id):
             continue
+        elif not(is_auto_looting(player_ship_object.id) or is_prepared_for_boarding_by(SURRENDERED_SHIP_ID, player_ship_object.id)):
+            continue
         elif player_ship_object.id not in rendezvous_counters:
             # rendezvous is starting
             if is_prepared_for_boarding_by(SURRENDERED_SHIP_ID, player_ship_object.id):
