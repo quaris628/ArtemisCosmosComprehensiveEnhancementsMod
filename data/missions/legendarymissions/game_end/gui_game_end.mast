@@ -73,7 +73,12 @@ signal_register(signal_game_ended(), "gui_game_end_on_game_ended")
         ~~
         for origin, destroyed_count in GAME_STATISTICS.get_origin_destroyed_counts_iterable():
             if 0 < destroyed_count:
-                create_label_value_pair(origin.capitalize(), str(destroyed_count), "yellow")
+                # TODO Make origin's display string more properly configurable
+                if origin == "tsn":
+                    origin_display_string = "TSN"
+                else:
+                    origin_display_string = origin.capitalize()
+                create_label_value_pair(origin_display_string, str(destroyed_count), "yellow")
         ~~
     
     # ----- right body -----
