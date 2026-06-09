@@ -25,7 +25,12 @@
             else:
                 hail_response_already_looted_component = ""
             
-            hail_response_message_components = [hail_response_nav_state_component, hail_response_already_looted_component]
+            if is_prepared_for_boarding_by(COMMS_SELECTED_ID, COMMS_ORIGIN_ID):
+                hail_response_prepared_for_boarding_component = "Our cargo bay doors are open for you."
+            else:
+                hail_response_prepared_for_boarding_component = ""
+            
+            hail_response_message_components = [hail_response_nav_state_component, hail_response_already_looted_component, hail_response_prepared_for_boarding_component]
             hail_response_message = "\n".join([message_component for message_component in hail_response_message_components if 0 < len(message_component)])
             
             comms_receive(hail_response_message, title="Hail", title_color=surrender_color)
@@ -54,6 +59,25 @@
         else:
             command_go_on_your_way(COMMS_SELECTED_ID, COMMS_ORIGIN_ID)
             comms_receive("We will leave this sector.", title="Retreating", title_color=surrender_color)
+    
+    + "Prepare to be boarded!" if can_loot(COMMS_ORIGIN_ID) and not is_looted(COMMS_SELECTED_ID):
+        if to_space_object(COMMS_SELECTED_ID) is None:
+            ~~pass~~
+        else:
+            command_outcome = command_prepare_to_be_boarded(COMMS_SELECTED_ID, COMMS_ORIGIN_ID)
+            if command_outcome == command_ptbb_outcome_running_away():
+                COMMAND_DESCRIPTION = "prepare to be boarded"
+                jump lalala_we_cant_hear_you_response
+            elif command_outcome == command_ptbb_outcome_already_looted() or command_outcome == command_ptbb_outcome_already_looted_and_running_away():
+                # Keep in mind that this edge case is possible:
+                # 1. the comms buttons get generated/displayed, including the prepare to be boarded button
+                # 2. the ship gets looted (possibly by another player pirate ship)
+                # 3. the comms officer selects the prepare to be boarded button
+                comms_receive("Our bays are empty! All our cargo has already been taken.", title="Already plundered", title_color=surrender_color)
+            elif command_outcome == command_ptbb_outcome_already_prepared_for_boarding():
+                comms_receive(f"We're already prepared to be boarded, {comms_origin_name}.", title="Already Prepared for Boarding", title_color=surrender_color)
+            elif command_outcome == command_ptbb_outcome_success():
+                comms_receive("We've opened our cargo bay doors.", title="Prepared for Boarding", title_color=surrender_color)
 
 //popup/comms if has_any_role(COMMS_ORIGIN_ID, "__player__,admiral") and has_roles(COMMS_SELECTED_ID, "surrendered") and COMMS_POPUP is None
     + "Go to location":
