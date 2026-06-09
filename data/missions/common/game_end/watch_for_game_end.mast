@@ -69,6 +69,11 @@ if client_id == 0:
     ->END
 
 ==== watch_for_game_end_end_bc_no_enemies ====
+    if wait_for_looting():
+        await delay_sim(45)
+        for player_id in role("__player__"):
+            comms_broadcast(player_id, msg="15 seconds remaining", color="lime")
+        await delay_sim(15)
     GAME_STATISTICS = get_game_statistics()
     GAME_STATISTICS.record_game_end(reason="Game ended because all enemies have been defeated.", is_success=True, zero_remaining_enemies=True)
     end_game()
