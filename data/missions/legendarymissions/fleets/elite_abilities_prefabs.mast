@@ -10,6 +10,9 @@ ability_range: close or far
     so = to_object(ELITE_ID)
     yield FAIL if so is None
     
+    if has_surrendered(ELITE_ID):
+        yield FAIL
+    
     jump ready if is_timer_finished(ELITE_ID, "WARMUP")
     t = format_time_remaining(ELITE_ID, "WARMUP")
     #
@@ -33,7 +36,11 @@ ability_range: close or far
     sim.force_update_to_clients(ELITE_ID,0)
     sbs.particle_on(so.engine_object, "align:False; offset:0,0,200;color:pink; lifespan:50; image_cell:9; size:10; speed: 2; count:1000")
 --- wait
-    await delay_sim(30)
+    # equivalent to await delay_sim(30) except interruptable by surrender
+    for i in range(6):
+        await delay_sim(5)
+        if has_surrendered(ELITE_ID):
+            jump clear
 
 --- clear
     so = to_object(ELITE_ID)
@@ -77,6 +84,9 @@ distance: -5000
 --- warmup
     so = to_object(ELITE_ID)
     yield FAIL if so is None
+    
+    if has_surrendered(ELITE_ID):
+        yield FAIL
     
     jump ready if is_timer_finished(ELITE_ID, "WARMUP")
     t = format_time_remaining(ELITE_ID, "WARMUP")
@@ -124,7 +134,9 @@ display_name: Warp
     if target_id != 0:
         d = sbs.distance_id(ELITE_ID, target_id)
         yield fail if d <= 500
-
+    
+    if has_surrendered(ELITE_ID):
+        yield FAIL
     
     jump ready if is_timer_finished(ELITE_ID, "WARMUP")
     t = format_time_remaining(ELITE_ID, "WARMUP")
@@ -153,7 +165,13 @@ display_name: Warp
     blob.set("speed_coeff", max(cur*warp_factor,warp_factor), 0)
     
 # wait for the warp time
-    await delay_sim(warp_time)
+    # equivalent to await delay_sim(warp_time) except interruptable by surrender
+    await delay_sim(warp_time % 5)
+    for i in range(int(warp_time / 5)):
+        if has_surrendered(ELITE_ID):
+            break
+        await delay_sim(5)
+    
 #restore the val
     blob = to_blob(ELITE_ID)
     yield FAIL if blob is None
@@ -179,6 +197,10 @@ display_name: HET
 ```
 
 --- ready
+    
+    if has_surrendered(ELITE_ID):
+        yield FAIL
+    
     blob = to_blob(ELITE_ID)
     yield FAIL if blob is None
     # Set the current Value
@@ -189,9 +211,13 @@ display_name: HET
     set_variable("turn_upgrade_coeff", tru)
     # Triple it 
     blob.set("turn_upgrade_coeff", tru*3.0, 0)
-
-    await delay_sim(30)
-
+    
+    # equivalent to await delay_sim(30) except interruptable by surrender
+    for i in range(6):
+        await delay_sim(5)
+        if has_surrendered(ELITE_ID):
+            break
+    
 --- clear
 
     blob = to_blob(ELITE_ID)
@@ -210,7 +236,10 @@ metadata: ```
 type: elite/tractor
 display_name: Tractor
 ```
-
+    
+    if has_surrendered(ELITE_ID):
+        yield FAIL
+    
     # Fail early if nothing is near
 
     #TODO: set tractor_target_uid
@@ -248,7 +277,10 @@ display_name: Shield Vamp
 
 ==== elite_shield_drain_vamp
     default is_vamp = False
-
+    
+    if has_surrendered(ELITE_ID):
+        yield FAIL
+    
     # Fail early if nothing is near
     yield FAIL if ELITE_ID is None or not object_exists(ELITE_ID)
     local = broad_test_around(ELITE_ID, 2500,2500, 0xF0) # Find  ships around here
@@ -276,7 +308,7 @@ display_name: Shield Vamp
     emittor_id = get_variable("emittor_id")
     yield FAIL if emittor_id is None
 
-    if not object_exists(target_id):
+    if not object_exists(target_id) or has_surrendered(ELITE_ID):
         sbs.delete_particle_emittor(emittor_id)
         yield FAIL
 
@@ -332,6 +364,9 @@ display_name: Shield Scramble
 --- warmup
     so = to_object(ELITE_ID)
     yield FAIL if so is None
+    
+    if has_surrendered(ELITE_ID):
+        yield FAIL
     
     jump ready if is_timer_finished(ELITE_ID, "WARMUP")
     t = format_time_remaining(ELITE_ID, "WARMUP")
