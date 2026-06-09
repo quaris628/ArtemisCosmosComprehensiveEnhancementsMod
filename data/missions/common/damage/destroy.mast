@@ -1,6 +1,10 @@
 
 //damage/destroy if has_role(DESTROYED_ID, "tsn") and not has_role(DESTROYED_ID, "standby")
+    if not has_already_sent_desperate_plea(DESTROYED_ID):
+        jump send_desperate_plea_message
+    ->END
 
+===== send_desperate_plea_message =====
     for player in role("__player__"):
         #
         # Setting these values enables comms messages 
@@ -12,13 +16,36 @@
             % We desperately need he......<static>
             % The enemy have over run us. We're doomed.
             % Remember us....<static>
-        
+    ->END
+
 //damage/destroy if has_roles(DESTROYED_ID, "delprox,station") 
     nav_id = get_inventory_value(DESTROYED_ID, "navprox_id", 0)
     print("Station Destroyed, Deleting Navproxy:")
     print(nav_id)
     sim.delete_navproxy_by_id(nav_id)
 
+# The "tsn" role isn't assigned to these killed tsn ships, at least at the time this event runs
+//damage/killed if is_tsn(DAMAGE_SELECTED_ID)
+    destroyed_by_ship_id = get_player_capital_ship_attributed_to_damage(DAMAGE_SOURCE_ID, DAMAGE_PARENT_ID)
+    
+    if destroyed_by_ship_id is not None and not has_killed_tsn(destroyed_by_ship_id):
+        old_docking_privileges = test_player_capital_pirate_ship_dock_at_tsn(destroyed_by_ship_id)
+        set_killed_tsn(destroyed_by_ship_id)
+        
+        if old_docking_privileges == dock_attempt_result_allowed_pirate_uneasy_alliance() or old_docking_privileges == dock_attempt_result_disallowed_piracy():
+            # Send the "Desperate plea" message, and then station admin message
+            await task_schedule(send_desperate_plea_message, data={"DESTROYED_ID": DAMAGE_SELECTED_ID})
+            set_already_sent_desperate_plea(DAMAGE_SELECTED_ID)
+            # Must wait for the engine to process the desperate plea message,
+            # otherwise it might appear after the station admin message.
+            await delay_sim(0.1)
+            
+            if old_docking_privileges == dock_attempt_result_allowed_pirate_uneasy_alliance():
+                send_tsn_admin_comms_message(destroyed_by_ship_id, "Banned from Docking", "Good lord, you've destroyed a friendly vessel! I told them we should never trust filthy pirates! DOCKING PRIVILEGES REVOKED!")
+            elif old_docking_privileges == dock_attempt_result_disallowed_piracy():
+                send_tsn_admin_comms_message(destroyed_by_ship_id, "Banned from Docking", "Good lord, you've destroyed a friendly vessel! Any hope we had of working together is gone. DOCKING PERMANENTLY PROHIBITED!")
+    
+    ->END
 
 //damage/killed if has_role(DAMAGE_SELECTED_ID, "raider")
     #
@@ -33,6 +60,17 @@
     ->END if DAMAGE_SELECTED_ID == 0
     dest_obj = to_object(DAMAGE_SELECTED_ID)
     ->END if dest_obj is None
+
+    if has_role(DAMAGE_SELECTED_ID, "raider"):
+        destroyed_by_ship_id = get_player_capital_ship_attributed_to_damage(DAMAGE_SOURCE_ID, DAMAGE_PARENT_ID)
+        if destroyed_by_ship_id is not None:
+            old_docking_privileges = test_player_capital_pirate_ship_dock_at_tsn(destroyed_by_ship_id)
+            if old_docking_privileges == dock_attempt_result_disallowed_pirate_killed_tsn():
+                send_tsn_admin_comms_message(destroyed_by_ship_id, "No Docking Clearance", "Your treachery won't be forgotten, no matter how many enemies you kill for us. You still can't dock with us.")
+            if not has_killed_raider(destroyed_by_ship_id):
+                set_killed_raider(destroyed_by_ship_id)
+                if old_docking_privileges == dock_attempt_result_disallowed_piracy():
+                    send_tsn_admin_comms_message(destroyed_by_ship_id, "Docking Clearance Granted", "You seem to be on our side, and we want to work together to protect this sector. You may dock with stations for supplies. But no funny business.")
     
     dest_side = dest_obj.side
     dest_origin = dest_obj.origin
