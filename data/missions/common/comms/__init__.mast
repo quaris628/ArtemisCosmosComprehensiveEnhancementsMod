@@ -25,3 +25,4 @@ import priority_docking.mast
 import enemy_stations.mast
 import player_comms.mast
 import boarding_parties.mast
+import pirate_side_quests.mast
