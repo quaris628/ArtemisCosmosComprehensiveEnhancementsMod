@@ -1,6 +1,7 @@
 import ../../common/library_function_patches.py
 import ../../common/model_game_statistics.py
 import ../../common/procedural_terrain.py
+import ../../common/pirate_features_definitions.py
 import ../game_setup/game_state.py
 import ../game_end/watch_for_game_end.py
 
