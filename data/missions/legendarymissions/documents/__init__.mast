@@ -1,4 +1,5 @@
 import ../../common/library_function_patches.py
+import ../../common/document_screen_lib.py
 
 # import ../game_setup/console_code_helpers.py
 # import ../game_setup/controller_game_setup_data.py

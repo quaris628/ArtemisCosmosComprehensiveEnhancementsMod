@@ -75,14 +75,3 @@ def quest_create_test_data():
     set_inventory_value(client_id,"__quests__", doc)
     set_inventory_value(ship_id, "__quests__",doc)
     return doc
-
-
-# ----- setter/getter wrappers -----
-
-def _get_document_back_button_label():
-    return get_variable(_DOCUMENT_BACK_BUTTON_LABEL_VAR_NAME)
-
-def set_document_back_button_label(back_label):
-    set_variable(_DOCUMENT_BACK_BUTTON_LABEL_VAR_NAME, back_label)
-
-_DOCUMENT_BACK_BUTTON_LABEL_VAR_NAME = "_document_back_button_label"

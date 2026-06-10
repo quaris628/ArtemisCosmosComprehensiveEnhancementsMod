@@ -5,7 +5,7 @@ from sbs_utils.procedural.gui import gui_icon_button, gui_message, gui_section
 from data.missions.common.library_function_patches import gui_switch_to
 from data.missions.common.gui_color_scheme import color_text
 
-from data.missions.legendarymissions.documents.document_screen import set_document_back_button_label
+from data.missions.common.document_screen_lib import set_document_back_button_label
 
 from controller_game_setup_data import get_game_setup_data
 

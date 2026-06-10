@@ -13,7 +13,7 @@ import ../../common/gui_color_scheme.py
 import ../../common/gui_top_tabs.py
 import ../../common/operator_mode.py
 
-import ../documents/document_screen.py
+import ../../common/document_screen_lib.py
 
 # data
 
