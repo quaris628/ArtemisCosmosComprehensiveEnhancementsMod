@@ -9,12 +9,12 @@ Properties:
     Player Ships: 'gui_int_slider("$text:int;low: 1.0;high:8.0;", var= "PLAYER_COUNT")'
     Difficulty: 'gui_int_slider("$text:int;low: 1.0;high:11.0;", var= "DIFFICULTY")'
   Map:
-    Terrain: 'gui_text("$text: None;color:#eee;")'
-    Lethal Terrain: 'gui_text("$text: None;color:#eee;")'
-    Friendly Ships: 'gui_text("$text: None;color:#eee;")'
-    Monsters: 'gui_text("$text: None;color:#eee;")'
-    Upgrades: 'gui_drop_down("$text: {UPGRADE_SELECT};list: none, few, some, lots, max;color:#eee;", var= "UPGRADE_SELECT")'
-    Time Limit: 'gui_input("desc: Minutes;color:#eee;", var="GAME_TIME_LIMIT", listbox_container=gui_get_variable("map_options_listbox"))'
+    Terrain: 'gui_text("$text: None;color:{color_text()};")'
+    Lethal Terrain: 'gui_text("$text: None;color:{color_text()};")'
+    Friendly Ships: 'gui_text("$text: None;color:{color_text()};")'
+    Monsters: 'gui_text("$text: None;color:{color_text()};")'
+    Upgrades: 'gui_drop_down("$text: {UPGRADE_SELECT};list: none, few, some, lots, max;color:{color_text()};", var= "UPGRADE_SELECT")'
+    Time Limit: 'gui_input("desc: Minutes;color:{color_text()};", var="GAME_TIME_LIMIT", listbox_container=gui_get_variable("map_options_listbox"))'
 ```
 
 

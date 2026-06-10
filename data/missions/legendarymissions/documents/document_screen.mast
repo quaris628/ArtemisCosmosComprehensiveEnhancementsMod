@@ -57,7 +57,7 @@ shared ALLOW_DOC_REFRESH  = SETTINGS.get("ALLOW_DOC_REFRESH", is_dev_build())
     # Left
     with gui_sub_section("col-width:35;"):
         gui_row()
-        obj_list = gui_list_box(document,"row-height: 0.1em; background:#1572;", item_template=document_item, title_template=document_type, select=True)
+        obj_list = gui_list_box(document, f"row-height:0.1em;background:{color_background()};", item_template=document_item, title_template=document_title, select=True)
         if topic is not None:
             obj_list.value = topic
 
@@ -78,7 +78,7 @@ $t {topic.get("display_text", "No display text")}
     if root_topic is not None:
         text.parse_header(root_topic.get("description",""))
     
-    obj_list.title_section_style += "background:#1578;"
+    obj_list.title_section_style += f"background:{color_background()};"
     on change obj_list.get_value():
         item = obj_list.get_value()
         if gui_list_box_is_header(item):

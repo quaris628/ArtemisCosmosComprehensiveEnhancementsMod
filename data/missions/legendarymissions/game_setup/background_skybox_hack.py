@@ -18,6 +18,7 @@ from sbs_utils.procedural.spawn import player_spawn
 from sbs_utils.procedural.timers import delay_app, delay_sim
 
 from game_state import game_state_running, get_game_state, signal_game_setup_initialized, signal_sim_created_for_game_start, signal_sim_wiped_after_game_ended
+from gui_color_scheme import color_fake_options_button_background
 
 def initialize_background_skybox_hack():
     if _get_skybox_path() is None:
@@ -68,9 +69,11 @@ def create_skybox_background_on_client(client_id, force_fallback_to_static_png=F
         # Most of the time it should hide behind the actual button anyway, but sometimes it
         # seems to be drawn in front.
         if not skip_fake_options_button:
-            gui_section(style="area:0,0,200px,36px;background:#0086cc;")
+            preferences_gui_color_main = sbs.get_preference_string("gui-color-main")
+            gui_section(style=f"area:0,0,200px,36px;background:{preferences_gui_color_main};")
+            # #0086cc;
             gui_blank()
-            gui_section(style="area:2px,2px,198px,34px;background:#002e40;")
+            gui_section(style=f"area:2px,2px,198px,34px;background:{color_fake_options_button_background()};")
             gui_blank()
         
         return background_image

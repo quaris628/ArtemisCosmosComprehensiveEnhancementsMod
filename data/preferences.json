@@ -39,7 +39,9 @@
   "render-distance-nebulae": 15000,
   "render-distance-asteroids": 35000,
   "render-distance-large-objects": 50000,
-
+  
+  // Also see color config in data/missions/common/gui_color_scheme.py
+  
   // this value defines the color of the whole GUI
   // it's a string, that follows the color format of CSS3.
   "gui-color-main": "#ccf",

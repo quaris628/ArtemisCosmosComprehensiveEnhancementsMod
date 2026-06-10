@@ -102,7 +102,7 @@ default shared WAR_TIME_DELAY = None
     on change WAR_TIME_DELAY:
         GAME_SETUP_DATA.environment_settings.war_time_delay_in_minutes = int(WAR_TIME_DELAY) if WAR_TIME_DELAY.isdecimal() else 0
     
-    gui_section(style=f"area:50+5px,30+5px,100-41px,100-65px;background:{color_background()};")
+    gui_section(style=f"area:50+5px,30+5px,100-41px,100-65px;")
     map_options_listbox = gui_property_list_box(name="Options")
     map_properties = get_map_properties_with_demo_check(selected_map_object)
     
