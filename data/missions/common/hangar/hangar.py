@@ -23,6 +23,8 @@ from sbs_utils.procedural.grid import grid_delete_objects
 from sbs_utils.fs import load_yaml_string
 import sbs
 
+from data.missions.common.gui_color_scheme import color_text, color_background_title
+
 _craft_id = 1
 
 def hangar_bump_version():
@@ -519,10 +521,10 @@ def hangar_get_crafts_at(dock_id):
 
 def hangar_console_ship_template(item):
     gui_row("row-height: 1.2em;padding:13px;")
-    gui_text(f"$text:{item.name};justify: left;")
+    gui_text(f"$text:{item.name};justify:left;color:{color_text()};")
     craft_type_display_text = get_craft_type_display_text(item.get_roles())
     gui_row("row-height: 1.2em;padding:13px;")
-    gui_text(f"$text:{craft_type_display_text};justify: left;font:gui-1")
+    gui_text(f"$text:{craft_type_display_text};justify:left;font:gui-1;color:{color_text()};")
 
 def get_craft_type_display_text(craft_roles):
     """
@@ -539,17 +541,17 @@ def get_craft_type_display_text(craft_roles):
         return "Unrecognized"
 
 def hangar_console_title_template():
-    gui_row("row-height: 1.2em;padding:13px;background:#1578;")
-    gui_text(f"$text:Ship;justify: left;")
+    gui_row(f"row-height:1.2em;padding:13px;background:{color_background_title()};")
+    gui_text(f"$text:Ship;justify:left;color:{color_text()};")
 
 
 def hangar_console_dock_template(item):
-    gui_row("row-height: 1.2em;padding:13px;")
-    gui_text(f"$text:{item.name};justify: left;")
+    gui_row("row-height:1.2em;padding:13px;")
+    gui_text(f"$text:{item.name};justify:left;color:{color_text()};")
     
 
 def hangar_console_dock_title_template():
-    gui_row("row-height: 1.2em;padding:13px;background:#1578;")
-    gui_text(f"$text:Hangar Location;justify: left;")
+    gui_row(f"row-height:1.2em;padding:13px;background:{color_background_title()};")
+    gui_text(f"$text:Hangar Location;justify:left;color:{color_text()};")
 
 

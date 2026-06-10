@@ -7,6 +7,7 @@ from sbs_utils.procedural.maps import map_get_properties
 from sbs_utils.procedural.timers import delay_app
 
 from data.missions.common.gui_top_tabs import gui_create_top_tabs, GuiTopTab
+from data.missions.common.gui_color_scheme import color_text, color_text_secondary, color_background, color_background_title, color_divider
 
 from controller_game_setup_data import get_game_setup_data
 
@@ -44,15 +45,15 @@ def get_map_properties_with_demo_check(map_identifier):
     return map_get_properties(map_identifier)
 
 def map_listbox_template(map_object):
-    gui_row("row-height:2px;background:#ddd;padding:10px,0,10px,3px;")
-    gui_row("row-height:3em;padding:10px,10px,10px,3px;")
-    gui_text(f"$text:{map_object.display_name};justify:left;font:gui-3;")
-    gui_row("padding:10px,10px,10px,3px;")
-    gui_text(f"$text:{map_object.desc};justify:left;color:#eee;font:gui-2;")
+    gui_row(f"row-height:2px;background:{color_divider()};padding:10px,0,10px,3px;")
+    gui_row(f"row-height:3em;padding:10px,10px,10px,3px;")
+    gui_text(f"$text:{map_object.display_name};justify:left;font:gui-3;color:{color_text()};")
+    gui_row(f"padding:10px,10px,10px,3px;")
+    gui_text(f"$text:{map_object.desc};justify:left;color:{color_text_secondary()};font:gui-2;")
 
 def map_listbox_title_template():
-    gui_row("row-height:1.2em;padding:13px;background:#1578;")
-    gui_text("$text:Mission Types;justify:left;")
+    gui_row(f"row-height:1.2em;padding:13px;background:{color_background_title()};")
+    gui_text(f"$text:Mission Types;justify:left;color:{color_text()};")
 
 # ----- player ships -----
 
