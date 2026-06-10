@@ -140,8 +140,8 @@ default shared WAR_TIME_DELAY = None
     
     # ----- main table stuff -----
     
-    ship_number_col_width = "26px"
-    ship_name_col_width = "250px"
+    ship_number_col_width = "20px"
+    ship_name_col_width = "265px"
     ship_type_col_width = "546px"
     details_col_width = "160px"
     
@@ -172,7 +172,8 @@ default shared WAR_TIME_DELAY = None
         
         # ship number
         with gui_sub_section(style=f"col-width:{ship_number_col_width};"):
-            number_text = gui_text(str(ship_number), style=f"font:gui-3;col-width:{ship_number_col_width};padding:4px,1px;color:{color_text()};")
+            gui_row(style="row-height:30px;")
+            number_text = gui_text(str(ship_number), style=f"font:gui-3;col-width:{ship_number_col_width};justify:center;color:{color_text()};")
         gui_blank(style="col-width:5px;")
         
         # ship name
@@ -188,7 +189,7 @@ default shared WAR_TIME_DELAY = None
             gui_row(style=f"row-height:24px;")
             with gui_sub_section(style=f"col-width:{ship_type_col_width};"):
                 create_player_ship_type_short_description_text(ship, style=f"font:gui-1;padding:4px,2px;color:{color_text()};background:{color_background()};")
-        gui_blank(style="col-width:10px;")
+        gui_blank(style="col-width:5px;")
         
         # go to detailed customization button
         with gui_sub_section(style=f"col-width:{details_col_width};"):
