@@ -92,7 +92,7 @@ def create_ship_type_specifications_text(ship, x_left, y_top, x_right, y_bottom)
     shuttles_text, ignored_var = _create_label_value_pair("Shuttles")
     fighters_text, ignored_var = _create_label_value_pair("Fighters")
     bombers_text, ignored_var = _create_label_value_pair("Bombers")
-    ship_energy_cost_text, ignored_var = _create_label_value_pair("Overall Energy Draw")
+    ship_energy_cost_text, ignored_var = _create_label_value_pair("Total Energy Draw")
     sensor_strength_text, ignored_var = _create_label_value_pair("Sensor strength*")
     
     # ----- footnote -----
@@ -133,7 +133,7 @@ def _create_big_value():
 
 def _create_label_value_pair(label_display_string):
     gui_row(style="row-height:24px;")
-    label_text = gui_text(label_display_string, style=f"font:gui-2;justify:right;col-width:160px;color:{color_text_secondary()};")
+    label_text = gui_text(label_display_string, style=f"font:gui-2;justify:right;col-width:144px;color:{color_text_secondary()};")
     value_text = gui_text("?", style=f"font:gui-2;padding:10px,0;color:{color_text()};")
     return value_text, label_text
 
