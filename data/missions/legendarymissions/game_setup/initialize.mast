@@ -90,6 +90,8 @@ else:
 
 ==== initialize_game ====
     
+    initialize_qlog()
+    
     initialize_vessel_types_data()
     
     initialize_game_statistics()
