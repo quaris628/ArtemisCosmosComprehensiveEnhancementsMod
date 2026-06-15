@@ -54,5 +54,8 @@ class VesselType:
     hullpoints: float
     beams: list[Beam]
     
+    def get_full_name(self):
+        return f"{self.origin} {self.ship_type_name}"
+    
     def get_short_description(self):
         return f"{len(self.beams)} beam{'' if len(self.beams) == 1 else 's'}"
