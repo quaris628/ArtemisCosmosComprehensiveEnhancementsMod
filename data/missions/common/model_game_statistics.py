@@ -3,8 +3,11 @@ from math import floor
 
 from sbs_utils.helpers import FrameContext
 from sbs_utils.procedural.roles import role, all_roles, has_role, has_roles
+from sbs_utils.procedural.query import to_space_object
 
 from data.missions.common.controller_vessel_types_data import get_vessel_types_data
+
+from data.missions.common.model_player_ship_statistics import PlayerShipStatistics
 
 class GameStatistics:
     
@@ -15,7 +18,6 @@ class GameStatistics:
         self._destroyed_counts_by_origin = {}
         for origin in get_vessel_types_data().get_all_origins():
             self._destroyed_counts_by_origin[origin.lower()] = 0
-        self._player_ships_destroyed_count = 0
         self._friendly_stations_destroyed_count = 0
         self._friendly_single_seat_destroyed_count = 0
         self._surrendered_count = 0
@@ -29,6 +31,11 @@ class GameStatistics:
         self._reason_for_end = None
         self._is_successful_end = None
         self._remaining_enemies = None
+        self._player_ships_statistics = {}
+    
+    def record_player_ship_added(self, ship_number, ship_id, ship_type_key, name):
+        player_ship_statistics = PlayerShipStatistics(ship_number, ship_type_key, name)
+        self._player_ships_statistics[ship_id] = player_ship_statistics
     
     # ----- vessel destroyed -----
     
@@ -36,7 +43,7 @@ class GameStatistics:
         if has_roles(vessel_object.id, "cockpit,__player__"):
             self._friendly_single_seat_destroyed_count += 1
         elif has_role(vessel_object.id, "__player__"):
-            self._player_ships_destroyed_count += 1
+            self._player_ships_statistics[vessel_object.id].record_destroyed(vessel_object)
         
         # TODO probably shouldn't hardcode "tsn" to be equivalent to friendly
         if has_roles(vessel_object.id, "station,tsn"):
@@ -65,7 +72,7 @@ class GameStatistics:
         return sum(self._destroyed_counts_by_origin.values())
     
     def get_player_ships_destroyed_count(self):
-        return self._player_ships_destroyed_count
+        return sum([1 for player_ship_statistics in self._player_ships_statistics.values() if player_ship_statistics.was_destroyed])
     
     def get_friendly_stations_destroyed_count(self):
         return self._friendly_stations_destroyed_count
@@ -136,8 +143,12 @@ class GameStatistics:
         self._reason_for_end = reason
         self._is_successful_end = is_success
         self._remaining_enemies = len(role("raider") | all_roles("enemy,station"))
-        # TODO maybe record remaining ordinance and energy of player ships
-        # Might be hard to do this if they get destroyed, but that might still be good to do
+        
+        player_ship_ids = role("__player__") - role("cockpit")
+        for player_ship_id in player_ship_ids:
+            player_ship_object = to_space_object(player_ship_id)
+            player_ship_statistics = self._player_ships_statistics[player_ship_id]
+            player_ship_statistics.record_game_end(player_ship_object)
     
     def get_duration_in_seconds(self):
         return self._duration_in_seconds
@@ -154,3 +165,20 @@ class GameStatistics:
     def get_remaining_enemies(self):
         return self._remaining_enemies
     
+    # ----- player ships -----
+    
+    def get_player_ship_statistics_by_id(self, player_ship_id):
+        if player_ship_id in self._player_ships_statistics:
+            return None
+        return self._player_ships_statistics[player_ship_id]
+    
+    def get_player_ship_statistics_by_number(self, ship_number):
+        # Maybe use an index instead? But that's more complicated
+        # and might not be worth any peformance improvement
+        for player_ship_statistics in self._player_ships_statistics.values():
+            if player_ship_statistics.number == ship_number:
+                return player_ship_statistics
+        return None
+    
+    def get_all_player_ships_statistics(self):
+        return sorted(self._player_ships_statistics.values())

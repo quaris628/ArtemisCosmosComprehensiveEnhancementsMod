@@ -18,6 +18,7 @@ from sbs_utils.procedural.terrain import terrain_to_value
 from sbs_utils.procedural.timers import delay_app, set_timer
 
 from data.missions.common.controller_vessel_types_data import get_vessel_types_data
+from data.missions.common.controller_game_statistics import get_game_statistics
 
 from game_state import signal_sim_created_for_game_start
 from model_console_slot import ConsoleSlot
@@ -145,6 +146,7 @@ def setup_game():
     SETTINGS = settings_get_defaults()
     GAME_SETUP_DATA = get_game_setup_data()
     VESSEL_TYPES_DATA = get_vessel_types_data()
+    GAME_STATISTICS = get_game_statistics()
     SHARED = get_shared_variable("SHARED")
     
     # Copied and adapted from server_console.mast
@@ -163,6 +165,8 @@ def setup_game():
         set_timer(SHARED, "time_limit", minutes=time_limit_in_minutes)
     
     extra_scan_sources_schedule()
+    
+    GAME_STATISTICS.record_game_start()
     
     # Player ships
     for ship_number in range(1, GAME_SETUP_DATA.player_ship_count + 1):
@@ -192,6 +196,8 @@ def setup_game():
         #grid_rebuild_grid_objects(player_ship_spawn_data.id, grid_get_grid_data())
         
         player_ship_setup_data.spawned_ship_id = player_ship_spawn_data.id
+        
+        GAME_STATISTICS.record_player_ship_added(ship_number, player_ship_spawn_data.id, player_ship_setup_data.ship_type_key, player_ship_setup_data.name)
         
         signal_emit(signal_player_ship_created(), data={"PLAYER_SHIP_ID": player_ship_spawn_data.id})
     
