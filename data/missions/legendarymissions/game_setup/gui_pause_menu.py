@@ -15,7 +15,6 @@ from sbs_utils.procedural.timers import delay_app, delay_sim
 from data.missions.common.library_function_patches import gui_represent_patched
 from data.missions.common.controller_game_statistics import get_game_statistics
 from data.missions.common.gui_color_scheme import color_background, color_text
-from data.missions.common.operator_mode import is_operator_mode_enabled
 
 from background_skybox_hack import create_skybox_background_on_client
 from game_state import end_game, get_game_state, game_state_paused, is_game_in_progress, resume_game, signal_game_ended, signal_game_state_changed, signal_game_started
@@ -34,12 +33,6 @@ def create_pause_menu(client_id):
     main_section = gui_section(style=f"area:5,50-160px,95,50+160px;background:{color_background()};")
     
     title_text = gui_text("Simulation is Paused", style=f"font:gui-6;justify:center;color:{color_text()};")
-    
-    if client_id == 0 and is_operator_mode_enabled():
-        _set_pause_menu_gui_elements(main_section, title_text, None, None, None, None, None, None, None, None, background_image)
-        _set_confirm_label(None)
-        task_schedule(_pause_menu_sync_hide_or_show_after_delay)
-        return
     
     gui_row(style="row-height:64px;")
     resume_button = gui_button("Resume Game", style=f"font:gui-3;padding:10px,5px,10px,5px;color:{color_text()}")
@@ -102,44 +95,41 @@ def _pause_menu_sync_hide_or_show():
         gui_show(background_image)
         main_section.background_color = color_background()
         gui_show(title_text)
-        if not(client_id == 0 and is_operator_mode_enabled()):
-            gui_show(resume_button)
-            gui_show(end_button)
-            if restart_current_mission_button is not None:
-                gui_show(restart_current_mission_button)
-            if back_to_startup_mission_button is not None:
-                gui_show(back_to_startup_mission_button)
+        gui_show(resume_button)
+        gui_show(end_button)
+        if restart_current_mission_button is not None:
+            gui_show(restart_current_mission_button)
+        if back_to_startup_mission_button is not None:
+            gui_show(back_to_startup_mission_button)
     else:
         gui_hide(background_image)
         main_section.background_color = "#00000000"
         gui_hide(title_text)
-        if not(client_id == 0 and is_operator_mode_enabled()):
-            gui_hide(resume_button)
-            gui_hide(end_button)
-            if restart_current_mission_button is not None:
-                gui_hide(restart_current_mission_button)
-            if back_to_startup_mission_button is not None:
-                gui_hide(back_to_startup_mission_button)
+        gui_hide(resume_button)
+        gui_hide(end_button)
+        if restart_current_mission_button is not None:
+            gui_hide(restart_current_mission_button)
+        if back_to_startup_mission_button is not None:
+            gui_hide(back_to_startup_mission_button)
     gui_represent_patched(background_image)
     gui_represent_patched(main_section)
     gui_represent_patched(title_text)
-    if not(client_id == 0 and is_operator_mode_enabled()):
-        gui_represent_patched(resume_button)
-        gui_represent_patched(end_button)
-        if restart_current_mission_button is not None:
-            gui_represent_patched(restart_current_mission_button)
-        if back_to_startup_mission_button is not None:
-            gui_represent_patched(back_to_startup_mission_button)
-        
-        confirm_section.background_color = "#00000000"
-        gui_hide(confirm_message_text)
-        gui_hide(cancel_button)
-        gui_hide(confirm_button)
-        gui_represent_patched(confirm_section)
-        gui_represent_patched(confirm_message_text)
-        gui_represent_patched(cancel_button)
-        gui_represent_patched(confirm_button)
-        _set_confirm_label(None)
+    gui_represent_patched(resume_button)
+    gui_represent_patched(end_button)
+    if restart_current_mission_button is not None:
+        gui_represent_patched(restart_current_mission_button)
+    if back_to_startup_mission_button is not None:
+        gui_represent_patched(back_to_startup_mission_button)
+    
+    confirm_section.background_color = "#00000000"
+    gui_hide(confirm_message_text)
+    gui_hide(cancel_button)
+    gui_hide(confirm_button)
+    gui_represent_patched(confirm_section)
+    gui_represent_patched(confirm_message_text)
+    gui_represent_patched(cancel_button)
+    gui_represent_patched(confirm_button)
+    _set_confirm_label(None)
     
     yield END()
 
