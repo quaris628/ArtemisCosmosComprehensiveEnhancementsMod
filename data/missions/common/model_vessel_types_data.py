@@ -19,6 +19,9 @@ class VesselTypesData:
     def get_ship_type_from_key(self, ship_type_key):
         return self._ship_types_by_key[ship_type_key]
     
+    def get_all_ship_type_keys(self):
+        return self._ship_types_by_key.keys()
+    
     def get_ship_type_from_origin_and_name(self, origin, ship_type_name):
         return self._ship_types_by_origin_and_name[(origin, ship_type_name)]
     
