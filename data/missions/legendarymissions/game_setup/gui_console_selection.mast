@@ -133,6 +133,9 @@ default TASK_LISTEN_FOR_AFTER_PLAYER_SHIP_DESTROYED = None
         gui_section(style="area:0,36px,200px,72px;")
         gui_text("Admin Access", style=f"font:gui-2;justify:center;color:{color_text_secondary()};")
         on gui_message(operator_admin_button):
+            GAME_SETUP_DATA.deselect_all_consoles(client_id)
+            selected_ship = GAME_SETUP_DATA.get_selected_ship(client_id)
+            selected_ship.deselect_all_consoles(client_id)
             gui_switch_to(gui_operator_mode_admin_client_login)
     
     # Set up signal listeners
