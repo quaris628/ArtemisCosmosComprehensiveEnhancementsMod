@@ -36,9 +36,13 @@
     
     on gui_message(password_input):
         if password_input.value == get_operator_mode_pin():
-            set_client_verified_operator_admin()
             accepted_text.value = "Accepted"
             gui_represent_patched(accepted_text)
+            GAME_SETUP_DATA = get_game_setup_data()
+            GAME_SETUP_DATA.deselect_all_consoles(client_id)
+            selected_ship = GAME_SETUP_DATA.get_selected_ship(client_id)
+            selected_ship.deselect_all_consoles(client_id)
+            set_client_verified_operator_admin()
             gui_switch_to(gui_operator_mode_admin_client_main)
     
     await gui_patched()
