@@ -64,7 +64,7 @@ gui_drag:
 gui_list_select: 23 - only seems to play for damcon list
 gui_lock: 23 - matches science at least; weapons will be diff
 gui_main_screen: 21 (or 22)
-gui_tab: 14 # more like radios, e.g. beam freq
+gui_tab: (old: 14) new: 18 # Played when radios (such as beam frequencies and science scan types) are clicked. Also played when a comms message is received. Also played when the weapons torpedo control drops clicks (vanilla issue #75: https://github.com/artemis-sbs/LegendaryMissions/issues/75 ) for some reason.
 
 gui_torp_fire: 16
 gui_torp_load: 17 (maybe not exactly? closest I could find)
