@@ -20,6 +20,7 @@ from data.missions.common.common_signals import signal_after_player_ship_destroy
 from data.missions.common.controller_vessel_types_data import get_vessel_types_data
 from data.missions.common.controller_game_statistics import get_game_statistics
 from data.missions.common.pirate_features_definitions import can_loot
+from data.missions.common.q_logger import qlog, qlog_level_info
 
 #from data.missions.legendarymissions.game_end.watch_for_game_end import set_game_end_conditions
 from sbs_utils.mast.mast_globals import MastGlobals
@@ -187,6 +188,8 @@ def setup_game():
         
         GAME_STATISTICS.record_player_ship_added(ship_number, player_ship_spawn_data.id, player_ship_setup_data.ship_type_key, player_ship_setup_data.name)
         
+        qlog(qlog_level_info(), f"type={player_ship_setup_data.ship_type_key} number={ship_number}", player_ship_id=player_ship_spawn_data.id)
+        
         signal_emit(signal_player_ship_created(), data={"PLAYER_SHIP_ID": player_ship_spawn_data.id})
         
         is_at_least_one_player_ship_able_to_loot = is_at_least_one_player_ship_able_to_loot or can_loot(player_ship_setup_data.spawned_ship_id)
@@ -230,6 +233,8 @@ def _game_setup_data_on_sim_created_for_game_start():
 def _game_setup_data_on_client_disconnect():
     client_id = get_variable("client_id")
     GAME_SETUP_DATA = get_game_setup_data()
+    
+    qlog(qlog_level_info(), "DISconnected", client_id=client_id)
     
     # check `not None` just in case this signal runs
     # prior to GAME_SETUP_DATA being initialized

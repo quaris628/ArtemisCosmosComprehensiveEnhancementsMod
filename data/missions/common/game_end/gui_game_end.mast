@@ -48,6 +48,8 @@ signal_register(signal_game_ended(), "gui_game_end_on_game_ended")
     if not ensure_on_gui_task(gui_game_end_main):
         ->END
     
+    qlog(qlog_level_info(), f"opening gui_game_end_main", client_id=client_id)
+    
     GAME_STATISTICS = get_game_statistics()
     GAME_SETUP_DATA = get_game_setup_data()
     
@@ -152,6 +154,8 @@ signal_register(signal_game_ended(), "gui_game_end_on_game_ended")
     
     if not ensure_on_gui_task(gui_game_end_main):
         ->END
+    
+    qlog(qlog_level_info(), f"opening gui_game_end_ship SHIP_NUMBER={SHIP_NUMBER}", client_id=client_id)
     
     GAME_STATISTICS = get_game_statistics()
     VESSEL_TYPES_DATA = get_vessel_types_data()
