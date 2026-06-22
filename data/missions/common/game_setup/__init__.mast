@@ -17,6 +17,8 @@ import ../../common/operator_mode.py
 
 import ../../common/document_screen_lib.py
 
+import ../../common/q_logger.py
+
 # data
 
 import model_console_slot.py

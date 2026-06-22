@@ -22,6 +22,8 @@ default shared WAR_TIME_DELAY = None
     if not ensure_on_gui_task(gui_game_setup_main):
         ->END
     
+    qlog(qlog_level_info(), "opening game setup", client_id=client_id)
+    
     # Do NOT assume that this will only run on the server!
     # It might be shown on a client if operator mode is enabled.
     
