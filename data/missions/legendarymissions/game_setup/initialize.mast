@@ -78,6 +78,11 @@ else:
     await gui_patched()
 
 ==== reroute_to_entry_point ====
+    if client_id == 0:
+        qlog(qlog_level_info(), "Server starting")
+    else:
+        qlog(qlog_level_info(), "connected", client_id=client_id)
+    
     get_game_setup_data().add_client(client_id)
     
     if is_operator_mode_logo_on_server_enabled():

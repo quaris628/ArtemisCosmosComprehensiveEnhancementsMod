@@ -10,6 +10,7 @@ from sbs_utils.procedural.links import link, unlink
 
 from data.missions.common.library_function_patches import ensure_on_gui_task
 from data.missions.common.gui_top_tabs import is_gui_top_tabs_enabled, gui_create_top_tabs, GuiTopTab, gui_top_tab_help_key, gui_top_tab_library_key, gui_top_tab_upgrades_key
+from data.missions.common.q_logger import qlog, qlog_level_info
 
 from controller_game_setup_data import get_game_setup_data
 from gui_help_button import create_help_button
@@ -26,6 +27,8 @@ def prepare_console(console_identifier, rerun_label=None, widget_list=None, enab
     GAME_SETUP_DATA = get_game_setup_data()
     client_id = get_variable("client_id")
     game_setup_assigned_ship = GAME_SETUP_DATA.get_selected_ship(client_id)
+    
+    qlog(qlog_level_info(), f"opening console {console_identifier}", client_id=client_id, non_player_ship_id = None if game_setup_assigned_ship is None else game_setup_assigned_ship.spawned_ship_id)
     
     if rerun_label is None:
         rerun_label = gui_get_console_type(console_identifier).label

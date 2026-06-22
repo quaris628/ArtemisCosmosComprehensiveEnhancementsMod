@@ -55,6 +55,8 @@ default TASK_LISTEN_FOR_AFTER_PLAYER_SHIP_DESTROYED = None
     if not ensure_on_gui_task(gui_console_selection_main):
         ->END
     
+    qlog(qlog_level_info(), "opening console selection", client_id=client_id)
+    
     create_skybox_background_on_client(client_id)
     
     # clear all old client-ship links?

@@ -5,11 +5,14 @@ from sbs_utils.procedural.timers import delay_app, delay_sim
 
 from sbs_utils.procedural.signal import signal_emit
 
+from data.missions.common.q_logger import qlog, qlog_level_info
+
 def initialize_game_state():
     _set_game_state(game_state_setting_up())
     signal_emit(signal_game_setup_initialized())
 
 def start_game():
+    qlog(qlog_level_info(), "Starting game")
     old_game_state = get_game_state()
     if old_game_state != game_state_setting_up():
         return
@@ -22,6 +25,7 @@ def start_game():
     signal_emit("game_started")
 
 def pause_game():
+    qlog(qlog_level_info(), "Pausing game")
     old_game_state = get_game_state()
     if old_game_state != game_state_running():
         return
@@ -30,6 +34,7 @@ def pause_game():
     signal_emit(signal_game_paused())
 
 def resume_game():
+    qlog(qlog_level_info(), "Resuming game")
     old_game_state = get_game_state()
     if old_game_state != game_state_paused():
         return
@@ -38,6 +43,7 @@ def resume_game():
     signal_emit(signal_game_resumed())
 
 def end_game():
+    qlog(qlog_level_info(), "Ending game")
     old_game_state = get_game_state()
     if old_game_state not in [game_state_running(), game_state_paused()]:
         return
@@ -66,6 +72,7 @@ def _wipe_sim_on_end_game_after_delay():
     yield END()
 
 def set_up_new_game():
+    qlog(qlog_level_info(), "Setting up new game")
     old_game_state = get_game_state()
     if old_game_state != game_state_ended():
         return
