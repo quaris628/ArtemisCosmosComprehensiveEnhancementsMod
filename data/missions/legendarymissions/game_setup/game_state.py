@@ -5,8 +5,6 @@ from sbs_utils.procedural.timers import delay_app, delay_sim
 
 from sbs_utils.procedural.signal import signal_emit
 
-from controller_game_setup_data import setup_game
-
 def initialize_game_state():
     _set_game_state(game_state_setting_up())
     signal_emit(signal_game_setup_initialized())
@@ -17,7 +15,6 @@ def start_game():
         return
     sim_create()
     signal_emit(signal_sim_created_for_game_start())
-    setup_game()
     sim_resume()
     _set_game_state(game_state_running())
     signal_emit(signal_game_started())

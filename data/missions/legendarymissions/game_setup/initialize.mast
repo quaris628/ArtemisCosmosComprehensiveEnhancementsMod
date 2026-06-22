@@ -100,6 +100,7 @@ else:
     await task_schedule(initialize_game_setup_data)
     # Have to register signals here, because signal listeners only listen
     # for as long as the task that created them is running
+    signal_register(signal_sim_created_for_game_start(), _game_setup_data_on_sim_created_for_game_start, server=True)
     signal_register("client_disconnect", _game_setup_data_on_client_disconnect)
     signal_register(signal_before_player_ship_destroyed(), _game_setup_data_before_player_ship_destroyed)
     signal_register(signal_after_player_ship_destroyed(), _game_setup_data_after_player_ship_destroyed)

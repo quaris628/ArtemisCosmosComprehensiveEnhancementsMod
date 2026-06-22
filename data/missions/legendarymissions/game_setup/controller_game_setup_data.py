@@ -19,6 +19,7 @@ from sbs_utils.procedural.timers import delay_app, set_timer
 
 from data.missions.common.controller_vessel_types_data import get_vessel_types_data
 
+from game_state import signal_sim_created_for_game_start
 from model_console_slot import ConsoleSlot
 from model_player_ship_setup_data import PlayerShipSetupData
 from model_environment_setup_data import EnvironmentalFrequency, EnvironmentSetupData
@@ -221,6 +222,13 @@ def _player_ship_spawn_actions_after_delay():
 _PLAYER_BEAM_DAMAGE_COEFF = 7.0
 
 # ----- Signal responses -----
+
+@label()
+def _game_setup_data_on_sim_created_for_game_start():
+    
+    setup_game()
+    
+    yield END()
 
 @label()
 def _game_setup_data_on_client_disconnect():

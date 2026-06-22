@@ -25,8 +25,8 @@ import model_game_setup_data.py
 
 # misc shared/helper stuff
 
-import controller_game_setup_data.py
 import game_state.py
+import controller_game_setup_data.py
 import gui_help_button.py
 import gui_library_button.py
 import jump_into_game.py
