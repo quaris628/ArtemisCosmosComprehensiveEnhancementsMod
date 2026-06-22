@@ -49,6 +49,12 @@ def get_possible_anomaly_types_table(wreck_origin):
             (0.3, "hidens_powercell"),
             (0.2, "lateral_array")
         ]
+    elif wreck_origin == "pirate":
+        return [
+            (0.5, "hidens_powercell"),
+            (0.3, "infusion_pcoils"),
+            (0.2, "secret_codecase")
+        ]
     else: # wreck_origin == "skaraan" or is None or otherwise unrecognized
         # equal chance of all types of anomalies
         return [
@@ -83,6 +89,9 @@ def get_possible_anomaly_types_description(wreck_origin):
     elif wreck_origin == "tsn":
         # infusion_pcoils, hidens_powercell, lateral_array
         return "This is a wreck of a TSN vessel, which might contain salvageable engine parts, sensor parts, or energy cells."
+    elif wreck_origin == "pirate":
+        # hidens_powercell, infusion_pcoils, secret_codecase
+        return "This is a wreck of a Pirate vessel, which might contain energy cells, salvageable engine parts, or intelligence on enemy codes."
     elif wreck_origin == "skaraan":
         # equal chance of all types of anomalies
         return "This is a wreck of a Skaaran vessel, which might contain salvageable parts of any kind!"
