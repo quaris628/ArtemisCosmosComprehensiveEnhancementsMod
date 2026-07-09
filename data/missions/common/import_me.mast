@@ -13,14 +13,20 @@ import ../common/data_panels/__init__.mast
 import ../common/docking/__init__.mast
 import ../common/documents/__init__.mast
 import ../common/fleets/__init__.mast
+import ../common/game_end/__init__.mast
+import ../common/game_setup/__init__.mast
 import ../common/gamemaster/__init__.mast
 import ../common/gamemaster_comms/__init__.mast
 import ../common/grid_comms/__init__.mast
 import ../common/hangar/__init__.mast
 import ../common/internal_comms/__init__.mast
 # ../common/media/LegendaryMissions/*
-import ../common/operator/__init__.mast
+import ../common/mainscreen/__init__.mast
 import ../common/prefabs/__init__.mast
 import ../common/science_scans/__init__.mast
 import ../common/side_missions/__init__.mast
 import ../common/upgrades/__init__.mast
+
+# initialize.mast must be imported dead last,
+# after every other mast file has run its top-level code.
+import ../common/game_setup/initialize.mast

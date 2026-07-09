@@ -1,6 +1,8 @@
 import ../../common/gui_switching.py
 import ../../common/q_logger.py
 
+import ../game_setup/console_code_helpers.py
+
 import pickup_common.mast
 import upgrade.mast
 
