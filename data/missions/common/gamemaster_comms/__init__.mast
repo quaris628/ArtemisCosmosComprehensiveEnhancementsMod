@@ -1,3 +1,7 @@
+# only referenced from mast, so these imports aren't actually necessary,
+# but it might be important to note that the dependency exists
+import ../../common/controller_game_statistics.py
+#import ../game_setup/game_state.py
 import gamemaster_comms.mast
 import gamemaster_comms_maps.mast
 import gamemaster_comms_messages.mast

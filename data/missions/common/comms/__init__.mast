@@ -2,6 +2,7 @@
 # and communicate with space objects, grid objects,
 # or any other objects.
 
+import ../../common/controller_game_statistics.py
 import ../consoles/layout_widgets.py
 
 import friendly_give_orders.mast
