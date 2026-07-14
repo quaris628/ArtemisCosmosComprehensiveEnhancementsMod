@@ -80,7 +80,7 @@ set_is_console_ship_specific("cinematic", True)
         ->END
     await gui()
 
-@console/cinematic !0 ^35 "Cinematic" if CINEMATIC_CONSOLE_ENABLED
+@console/cinematic !0 ^35 "Cinematic View" if CINEMATIC_CONSOLE_ENABLED
     " The cinematic view of the action
     if not prepare_console("cinematic"):
         ->END

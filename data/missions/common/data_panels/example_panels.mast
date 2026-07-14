@@ -4,7 +4,7 @@
 
 set_is_console_ship_specific("display_panels", True)
 
-@console/display_panels !0 ^110 "Display panels" 
+@console/display_panels !0 ^110 "Display Panels View"
     " Display panels for this ship
     
 #
