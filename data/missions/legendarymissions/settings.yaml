@@ -172,6 +172,7 @@ CONSOLE_EXCLUSIVITIES:
     threeDview: false
     simplemap: false
     cinematic: false
+    internalship: false
     display_panels: false
     
     # ship-agnostic consoles
