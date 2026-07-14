@@ -5,7 +5,7 @@ set_is_console_ship_specific("mainscreen", True)
     initialize_mainscreen_view_facing_and_mode(PLAYER_SHIP_ID)
     ->END
 
-@console/mainscreen !0 ^30 "Mainscreen" if MAINSCREEN_CONSOLE_ENABLED
+@console/mainscreen !0 ^30 "Mainscreen View" if MAINSCREEN_CONSOLE_ENABLED
     " The main viewscreen
     
     if not prepare_console("mainscreen", widget_list="3dview^2dview^ship_internal_view^ship_data^text_waterfall"):
