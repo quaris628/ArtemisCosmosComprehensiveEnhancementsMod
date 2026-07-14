@@ -35,6 +35,9 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
     set_comms_options_property_list_box(options_property_list_box)
     signal_register(signal_comms_property_list_box_update_ship_to_ship(player_ship_id), _gui_comms_on_property_list_box_update_ship_to_ship, is_temporary=True)
     
+    gui_section(f"area:27,100-54px,75,100;background:{color_background()};")
+    gui_text("Right-click (or long-tap) the map to access message options specific to other objects or locations.", style=f"font:gui-1;justify:center;padding:5px,3px,5px,3px;color:{color_text_secondary()};")
+    
     yield idle
 
 ==== _gui_comms_on_property_list_box_update_ship_to_ship ====
