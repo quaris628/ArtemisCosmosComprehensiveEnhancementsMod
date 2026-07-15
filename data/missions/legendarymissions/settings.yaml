@@ -169,6 +169,7 @@ CONSOLE_EXCLUSIVITIES:
     science: true
     comms: true
     mainscreen: false
+    threeDview: false
     cinematic: false
     display_panels: false
     
