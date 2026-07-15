@@ -17,6 +17,7 @@ set_is_console_ship_specific("normal_weap", True)
 set_is_console_ship_specific("engineering", True)
 set_is_console_ship_specific("science", True)
 set_is_console_ship_specific("comms", True)
+set_is_console_ship_specific("threeDview", True)
 set_is_console_ship_specific("cinematic", True)
 
 #if is_dev_build():
@@ -34,6 +35,16 @@ set_is_console_ship_specific("cinematic", True)
     
     if not prepare_console("helm", enable_helm_jump_drive_controls=is_jump_drive_active):
         ->END
+    
+    # Necessary to sync the engine's per-client copy of the view/facing/mode
+    # because this is what's compared against by the engine's event for the
+    # mainscreen controls being clicked. If they're out of sync, then bad data
+    # can leak out into the script's copy of the view/facing/mode values too.
+    view = get_mainscreen_view(player_ship_setup_data.spawned_ship_id)
+    facing = get_mainscreen_facing(player_ship_setup_data.spawned_ship_id)
+    mode = get_mainscreen_mode(player_ship_setup_data.spawned_ship_id)
+    sbs.set_main_view_modes(client_id, view, facing, mode)
+    
     await gui()
 
 
@@ -41,6 +52,17 @@ set_is_console_ship_specific("cinematic", True)
     " Protect the ship from enemies
     if not prepare_console("normal_weap", widget_list="3dview^main_screen_control^radar_zoom_ctrl^shield_control^ship_data^text_waterfall^weap_beam_freq^weap_beam_speed^weapon_2d_view^weapon_control"):
         ->END
+    
+    # Necessary to sync the engine's per-client copy of the view/facing/mode
+    # because this is what's compared against by the engine's event for the
+    # mainscreen controls being clicked. If they're out of sync, then bad data
+    # can leak out into the script's copy of the view/facing/mode values too.
+    player_ship_id = sbs.get_ship_of_client(client_id)
+    view = get_mainscreen_view(player_ship_id)
+    facing = get_mainscreen_facing(player_ship_id)
+    mode = get_mainscreen_mode(player_ship_id)
+    sbs.set_main_view_modes(client_id, view, facing, mode)
+    
     await gui()
 
 
@@ -107,4 +129,10 @@ set_is_console_ship_specific("cinematic", True)
             sbs.assign_client_to_ship(client_id, focus_id)
             gui_cinematic_auto(client_id)
 
+    await gui()
+
+@console/threeDview !0 ^31 "3D View"
+    " A 3D view of the ship
+    if not prepare_console("threeDview", widget_list="3dview^ship_data^text_waterfall"):
+        ->END
     await gui()
