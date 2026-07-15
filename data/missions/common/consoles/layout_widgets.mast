@@ -208,6 +208,119 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
         gui_info_panel(tab=tab)
         gui_info_panel_add("message", 83, gui_panel_console_message,None, gui_panel_console_message_tick)
 
+//gui/threeDview
+    default tab = 1
+    # Ship Data
+    gui_section(style="area:0,45px,100-300px,100;")
+    with gui_sub_section("col-width:280px;"):
+        gui_row("row-height: 400px;")
+        gui_info_panel(tab=tab)
+        gui_info_panel_add("message", 83, gui_panel_console_message, None, gui_panel_console_message_tick)
+    
+    # View controls
+    
+    arrows_section_style = "area:76,10,88,22;"
+    other_section_style = "area:88,10,98,22;"
+    #icon_style = f"justify:center;color:{color_text()};"
+    icon_style = f"color:{color_text()};"
+    text_style = f"font:gui-3;justify:center;color:{color_text()};"
+    
+    # Use separate buttons and texts to allow using justify:center;
+    
+    # Buttons
+    gui_section(style=arrows_section_style)
+    gui_row()
+    gui_blank()
+    front_button = gui_button("")
+    gui_blank()
+    gui_row()
+    left_button = gui_button("")
+    gui_blank()
+    right_button = gui_button("")
+    gui_row()
+    gui_blank()
+    back_button = gui_button("")
+    gui_blank()
+    gui_section(style=other_section_style)
+    gui_row()
+    inside_button = gui_button("")
+    gui_row()
+    chase_button = gui_button("")
+    gui_row()
+    track_button = gui_button("")
+    
+    # Text
+    gui_section(style=arrows_section_style)
+    gui_row()
+    gui_blank()
+    #gui_text("$text:^;", style=text_style)
+    gui_icon(f"icon_index:148;{icon_style}", style=icon_style)
+    gui_blank()
+    gui_row()
+    #gui_text("<", style=text_style)
+    gui_icon(f"icon_index:151;{icon_style}", style=icon_style)
+    gui_blank()
+    #gui_text(">", style=text_style)
+    gui_icon(f"icon_index:149;{icon_style}", style=icon_style)
+    gui_row()
+    gui_blank()
+    #gui_text("v", style=text_style)
+    gui_icon(f"icon_index:150;{icon_style}", style=icon_style)
+    gui_blank()
+    gui_section(style=other_section_style)
+    gui_row()
+    gui_text("Inside", style=text_style)
+    gui_row()
+    gui_text("Chase", style=text_style)
+    gui_row()
+    gui_text("Track", style=text_style)
+    
+    # setting facing and mode
+    facing = get_inventory_value(client_id, "3d_console_facing", "front")
+    mode = get_inventory_value(client_id, "3d_console_mode", "chase")
+    sbs.set_main_view_modes(client_id, "3d_view", facing, mode)
+    set_inventory_value(client_id, "3d_console_facing", facing)
+    set_inventory_value(client_id, "3d_console_mode", mode)
+    
+    on gui_message(front_button):
+        facing = "front"
+        mode = get_inventory_value(client_id, "3d_console_mode")
+        sbs.set_main_view_modes(client_id, "3d_view", facing, mode)
+        set_inventory_value(client_id, "3d_console_facing", facing)
+    on gui_message(left_button):
+        facing = "left"
+        mode = get_inventory_value(client_id, "3d_console_mode")
+        sbs.set_main_view_modes(client_id, "3d_view", facing, mode)
+        set_inventory_value(client_id, "3d_console_facing", facing)
+    on gui_message(right_button):
+        facing = "right"
+        mode = get_inventory_value(client_id, "3d_console_mode")
+        sbs.set_main_view_modes(client_id, "3d_view", facing, mode)
+        set_inventory_value(client_id, "3d_console_facing", facing)
+    on gui_message(back_button):
+        facing = "back"
+        mode = get_inventory_value(client_id, "3d_console_mode")
+        sbs.set_main_view_modes(client_id, "3d_view", facing, mode)
+        set_inventory_value(client_id, "3d_console_facing", facing)
+    
+    on gui_message(inside_button):
+        facing = get_inventory_value(client_id, "3d_console_facing")
+        mode = "first_person"
+        sbs.set_main_view_modes(client_id, "3d_view", facing, mode)
+        set_inventory_value(client_id, "3d_console_mode", mode)
+    on gui_message(chase_button):
+        facing = get_inventory_value(client_id, "3d_console_facing")
+        mode = "chase"
+        sbs.set_main_view_modes(client_id, "3d_view", facing, mode)
+        set_inventory_value(client_id, "3d_console_mode", mode)
+    on gui_message(track_button):
+        facing = get_inventory_value(client_id, "3d_console_facing")
+        mode = "tracking"
+        sbs.set_main_view_modes(client_id, "3d_view", facing, mode)
+        set_inventory_value(client_id, "3d_console_mode", mode)
+    
+    yield idle
+
 
 
 
