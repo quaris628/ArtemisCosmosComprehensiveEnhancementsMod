@@ -12,6 +12,7 @@ from sbs_utils.procedural.space_objects import target_pos
 from data.missions.common.distance_utils import broad_test_around_position, is_distance_closer_than_or_equal_to
 from data.missions.common.pirate_features_definitions import is_looted
 
+from data.missions.common.game_setup.game_state import end_task_when_game_ends
 
 # ----- Gameplay constants -----
 # Change these to tweak gameplay balance
@@ -338,6 +339,7 @@ def _set_nav_state(surrendered_ship_id, commanded_by_ship_id, nav_state, expect_
     old_nav_task = get_inventory_value(surrendered_ship_id, inventory_key_surrendered_nav_task())
     new_nav_task = task_schedule(nav_state, data={"SURRENDERED_SHIP_ID": surrendered_ship_id, "COMMANDED_BY_SHIP_ID": commanded_by_ship_id})
     set_inventory_value(surrendered_ship_id, inventory_key_surrendered_nav_task(), new_nav_task)
+    end_task_when_game_ends(new_nav_task)
     
     if old_nav_task is not None:
         # old_nav_task might be the one calling this function; if so, don't cancel it

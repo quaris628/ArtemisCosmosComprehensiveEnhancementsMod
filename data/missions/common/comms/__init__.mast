@@ -8,6 +8,7 @@ import ../../common/pirate_features_definitions.py
 import ../../common/docking_permissions.py
 
 import ../consoles/layout_widgets.py
+import ../game_setup/game_state.py
 
 import surrendered_navigation.py
 import surrendered_navigation.mast
