@@ -19,9 +19,18 @@ pirate_side_quests = {}
 pirate_side_quest_next_id = 0
 pirate_side_quest_npc_index = {} # key: ship or station id, value: quest_id set
 
-shared _deal_out_pirate_side_quests = task_schedule(deal_out_pirate_side_quests)
-shared _advance_pirate_side_quests = task_schedule(advance_pirate_side_quests)
+if client_id == 0:
+    signal_register(signal_game_started(), pirate_side_quests_on_game_start, server=True)
 
+==== pirate_side_quests_on_game_start ====
+    
+    deal_out_pirate_side_quests_task = task_schedule(deal_out_pirate_side_quests)
+    advance_pirate_side_quests_task = task_schedule(advance_pirate_side_quests)
+    
+    end_task_when_game_ends(deal_out_pirate_side_quests_task)
+    end_task_when_game_ends(advance_pirate_side_quests_task)
+    
+    ->END
 
 ======== deal_out_pirate_side_quests  =========
 
