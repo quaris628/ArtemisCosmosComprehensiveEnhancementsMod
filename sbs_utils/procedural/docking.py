@@ -16,6 +16,7 @@ class _DockingBrain:
 
 __docking_pairs = {}
 def docking_set_docking_logic(player_set, npc_set, label, data=None):
+    global __docking_pairs
     docking_schedule()
     player_ids = to_set(player_set)
     npc_ids = to_set(npc_set)
@@ -24,7 +25,6 @@ def docking_set_docking_logic(player_set, npc_set, label, data=None):
             docks = __docking_pairs.get(player_id, {})
             docks[npc_id] = _DockingBrain(label, data)
             __docking_pairs[player_id] = docks
-            
 
 __docking_tick_task = None
 def docking_schedule():
@@ -35,6 +35,13 @@ def docking_schedule():
     if __docking_tick_task is None:
         __docking_tick_task = TickDispatcher.do_interval(docking_run_all, 1)
 
+def docking_clear_all_docking_logic():
+    global __docking_pairs
+    global __docking_tick_task
+    __docking_pairs = {}
+    if __docking_tick_task is not None:
+        __docking_tick_task.stop()
+        __docking_tick_task = None
 
 __docking_is_running = False
 def docking_run_all(tick_task):
