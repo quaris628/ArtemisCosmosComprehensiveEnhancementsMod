@@ -163,8 +163,12 @@ Properties:
         ->END
 
     shared war_declared = 0
-    task_schedule(war_timer_loop)
-    task_schedule(check_neutral_zone)
+    war_timer_loop_task = task_schedule(war_timer_loop)
+    check_neutral_zone_task = task_schedule(check_neutral_zone)
+    
+    end_task_when_game_ends(war_timer_loop_task)
+    end_task_when_game_ends(check_neutral_zone_task)
+    
     ->END
 
 ======= war_timer_loop =========
