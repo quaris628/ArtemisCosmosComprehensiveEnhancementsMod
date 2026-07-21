@@ -1,29 +1,16 @@
 
-
-//spawn if has_roles(SPAWNED_ID, "tsn,fighter")
-    set_inventory_value(SPAWNED_ID, "briefing", "This is the start of a fighter mission")
-    CRAFT_ID = SPAWNED_ID
-    jump hangar_schedule_mission
+//spawn if has_roles(SPAWNED_ID, "tsn,shuttle") or has_roles(SPAWNED_ID, "tsn,fighter")
+    mission_task = task_schedule(hangar_schedule_mission, data={"CRAFT_ID": SPAWNED_ID})
+    end_task_when_game_ends(mission_task)
     ->END
 
-
-//spawn if has_roles(SPAWNED_ID, "tsn,shuttle")
-    set_inventory_value(SPAWNED_ID, "briefing", "This is the start of a shuttle mission")
-    CRAFT_ID = SPAWNED_ID
-    jump hangar_schedule_mission
-
 ======== hangar_schedule_mission
-        
----- wait_for_game_started
-    # TODO this might need to be reworked to allow restarting a game
-    # without restarting the entire mission script?
-    game_state = get_game_state()
-    if not (game_state == game_state_running() or game_state == game_state_paused()):
-        await delay_sim(3)
-        jump wait_for_game_started
-    ->END if to_object(CRAFT_ID) is None
-
-
+    
+    if to_space_object(CRAFT_ID) is None:
+        ->END
+    
+    set_inventory_value(CRAFT_ID, "briefing", "This is the start of a craft's mission")
+    
     docked_with = get_dedicated_link(CRAFT_ID, "home_dock")
 
     if random.randint(0,4) == 2:

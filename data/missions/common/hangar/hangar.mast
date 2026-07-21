@@ -7,6 +7,12 @@ shared next_call_sign = 0
 
 # Just make sure the data loads
 hangar_get_craft_data("tsn")
+
+if client_id == 0:
+    signal_register(signal_game_ended(), hangar_on_game_ended_server, server=True)
+else:
+    signal_register(signal_game_ended(), hangar_on_game_ended_client, server=False)
+
 #
 # The route_spawn label is the entry point 
 # it examines the SPAWNED_ID to either
@@ -405,4 +411,15 @@ hangar_get_craft_data("tsn")
     listener_task = get_inventory_value(client_id, "hangar_task_listener_for_console_slot_deselect")
     task_cancel(listener_task)
     
+    ->END
+
+==== hangar_on_game_ended_server ====
+    hangar_reset_craft_number()
+    ->END
+
+==== hangar_on_game_ended_client ====
+    set_dedicated_link(client_id, "craft_id", None)
+    set_inventory_value(client_id, "sortie", 0)
+    set_inventory_value(client_id, "completed_objectives", 0)
+    # Let call sign persist between games
     ->END
