@@ -626,3 +626,7 @@ def get_available_ordinance_types(craft_object):
     all_ordinance_types = ["Homing", "Nuke", "EMP", "Mine"]
     available_ordinance_types = [ordinance_type for ordinance_type in all_ordinance_types if craft_object.data_set.get(f"{ordinance_type}_MAX", 0) > 0]
     return available_ordinance_types
+
+def hangar_reset_craft_number():
+    global _craft_id
+    _craft_id = 1
