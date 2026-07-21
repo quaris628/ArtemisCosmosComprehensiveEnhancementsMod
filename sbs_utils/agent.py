@@ -231,7 +231,21 @@ class Agent():
         # Clear roles
         Agent.roles.remove_every_collection(id)
         
-        ## TODO: Remove from inventory, and links
+        # Clear inventory
+        inventory_keys_to_remove = [inventory_key for inventory_key in agent_object.inventory.collections]
+        for inventory_key in inventory_keys_to_remove:
+            agent_object.set_inventory_value(inventory_key, None)
+        
+        # Clear links
+        link_names_to_remove = [link_name for link_name in agent_object.links.collections]
+        for link_name in link_names_to_remove:
+            agent_object.remove_link_all(link_name)
+        # Do not remove links TO this agent, only FROM this agent.
+        # This allows, for example, a single-seat craft to differentiate
+        # whether its home_dock object was deleted or whether said craft
+        # was never assigned a home_dock link.
+        # If the link was deleted whenever the TO object is deleted, then
+        # that information would get lost.
         
         agent_object._alive = False
         
