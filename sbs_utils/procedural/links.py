@@ -95,9 +95,9 @@ def set_dedicated_link(so, link_name: str, to):
         to (Agent | int): The single agent or id or None
     """    
     so = to_object(so)
-    to = to_id(to)
-    if so is None or to is None:
+    if so is None:
         return
+    to = to_id(to)
     so.set_dedicated_link(link_name, to)
 
 
