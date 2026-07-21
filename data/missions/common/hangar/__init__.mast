@@ -4,6 +4,7 @@ import ../../common/gui_repair_levels_display.py
 import ../../common/pirate_features_definitions.py
 
 import ../game_setup/console_code_helpers.py
+import ../game_setup/game_state.py
 
 import hangar.py
 import gui_home_docks_dropdown.py
