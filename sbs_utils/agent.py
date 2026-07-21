@@ -210,9 +210,31 @@ class Agent():
 
     @classmethod
     def _remove(cls, id):
-        Agent.all.pop(id, None) #Allow remove if not added
-        ## TODO: Remove from inventory, and links
+        if id not in Agent.all:
+            return
+        agent_object = Agent.all[id]
+        
+        # Clear roles
         Agent.roles.remove_every_collection(id)
+        
+        # Clear inventory
+        inventory_keys_to_remove = [inventory_key for inventory_key in agent_object.inventory.collections]
+        for inventory_key in inventory_keys_to_remove:
+            agent_object.set_inventory_value(inventory_key, None)
+        
+        # Clear links
+        link_names_to_remove = [link_name for link_name in agent_object.links.collections]
+        for link_name in link_names_to_remove:
+            agent_object.remove_link_all(link_name)
+        # Do not remove links TO this agent, only FROM this agent.
+        # This allows, for example, a single-seat craft to differentiate
+        # whether its home_dock object was deleted or whether said craft
+        # was never assigned a home_dock link.
+        # If the link was deleted whenever the TO object is deleted, then
+        # that information would get lost.
+        
+        # Clear from to_object() lookups
+        Agent.all.pop(id, None)
 
     ########## ROLES ########################
     def add_role(self, role: str):
