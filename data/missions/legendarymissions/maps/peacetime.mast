@@ -86,11 +86,11 @@ Properties:
 
     # The lists are loaded in from shipnames.json to help build a fleet of cargo ships with captains, containers, and goods
     alpha = [ "B", "C", "F", "G", "H", "J", "R", "S", "U", "V", "Y", "Z" ]
-    civname_list = SHIP_NAME_DATA.get("civilian")
-    peacetime_list = SHIP_NAME_DATA.get("peacetime")
-    capname_list = SHIP_NAME_DATA.get("captain")
-    clue_list = SHIP_NAME_DATA.get("clue_list")
-    goods_list = SHIP_NAME_DATA.get("tradegoods")
+    civname_list = list(SHIP_NAME_DATA.get("civilian"))
+    peacetime_list = list(SHIP_NAME_DATA.get("peacetime"))
+    capname_list = list(SHIP_NAME_DATA.get("captain"))
+    clue_list = list(SHIP_NAME_DATA.get("clue_list"))
+    goods_list = list(SHIP_NAME_DATA.get("tradegoods"))
     suspect = []
 
     # Kidnapper ship (first suspect) hides the ambassador in a suspicious container, randomized as list index 6, 8, 10, or 12.
