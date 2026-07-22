@@ -4,7 +4,9 @@ default gamemaster_face = random_terran()
 elite_build_abilities()
 
 //spawn if has_role(SPAWNED_ID, "elite")
-    task_schedule(handle_elite_abilities, {"ELITE_ID": SPAWNED_ID})
+    elite_abilities_task = task_schedule(handle_elite_abilities, {"ELITE_ID": SPAWNED_ID})
+    end_task_when_game_ends(elite_abilities_task)
+    ->END
 
 ==== handle_elite_abilities
     so = to_object(ELITE_ID)
@@ -75,6 +77,7 @@ elite_build_abilities()
         # e.g. elite_scramble, set science status, set time "elite_all_cooldown"
         #   Disable engine abilities TODO (how?)
         elite_task = task_schedule(elite_label, data={"ELITE_ID": ELITE_ID})
+        end_task_when_game_ends(elite_task)
         set_inventory_value(ELITE_ID, "ELITE_TASK", elite_task)
         signal_emit("elite_ability_start", {"ELITE_ID": ELITE_ID, "ability": ab})
         e = await elite_task
