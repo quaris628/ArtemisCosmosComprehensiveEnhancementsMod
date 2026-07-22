@@ -456,10 +456,15 @@ Properties:
         ds1_pos = ds1_obj.pos
         pickup_spawn(ds1_pos.x, ds1_pos.y, ds1_pos.z - 500, "secret_codecase")
 
-
-    task_schedule(scanning_cargo_containers)
-    task_schedule(check_ambassador_rescued)
-    task_schedule(kidnap_message)
+    scanning_cargo_containers_task = task_schedule(scanning_cargo_containers)
+    check_ambassador_rescued_task = task_schedule(check_ambassador_rescued)
+    kidnap_message_task = task_schedule(kidnap_message)
+    
+    end_task_when_game_ends(scanning_cargo_containers_task)
+    end_task_when_game_ends(check_ambassador_rescued_task)
+    end_task_when_game_ends(kidnap_message_task)
+    
+    ->END
 
     #-----------------------------------------------------------------------------------------------------------------------------
     # Comms Section - Adds comms buttons for talking to stations. Some buttons only work if the player is docked with the station.
@@ -973,7 +978,9 @@ yield success
     pest_id = COLLISION_SELECTED_ID
     pest_idx = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     pest_list = SHIP_NAME_DATA.get("complaints")
-    task_schedule(pest_messages)
+    pest_messages_task = task_schedule(pest_messages)
+    end_task_when_game_ends(pest_messages_task)
+    ->END
 
 //damage/destroy if has_role(DESTROYED_ID, "kidnapper") and not has_role(DESTROYED_ID, "standby")
     if kidnap_status < 3:
