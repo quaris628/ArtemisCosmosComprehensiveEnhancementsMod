@@ -1,6 +1,6 @@
 from sbs_utils.agent import Agent, get_story_id
 from sbs_utils.mast.label import label
-from sbs_utils.procedural.execution import task_schedule, jump, AWAIT
+from sbs_utils.procedural.execution import task_cancel, task_schedule, jump, AWAIT
 from sbs_utils.procedural.timers import delay_sim, is_timer_finished, set_timer, is_timer_set, clear_timer
 from sbs_utils.procedural.query import to_object, to_id, object_exists, to_object_list, get_side
 from sbs_utils.procedural.space_objects import target, closest, broad_test_around, target_pos
@@ -25,8 +25,8 @@ class NpcCAG(Agent):
         self.add()
         self.add_role("npccag")
 
-        task_schedule(self.tick_fighter_launch)
-        task_schedule(self.tick_fighter_manage)
+        self.tick_fighter_launch_task = task_schedule(self.tick_fighter_launch)
+        self.tick_fighter_manage_task = task_schedule(self.tick_fighter_manage)
 
     #--------------------------------------------------------------------------------------
     def get_fighter_key(self, carrier_race):
@@ -186,6 +186,12 @@ class NpcCAG(Agent):
         yield AWAIT(delay_sim(seconds=2))
         yield jump(self.tick_fighter_manage)
 
+    def end(self):
+        task_cancel(self.tick_fighter_launch_task)
+        task_cancel(self.tick_fighter_manage_task)
+        
+        self.remove_link_all("active_fighter_list")
+        self.remove_link_all("inactive_fighter_list")
 
 _npc_cag = None
 #--------------------------------------------------------------------------------------
@@ -195,6 +201,7 @@ def start_npc_cag():
         _npc_cag = NpcCAG()
     return _npc_cag
 
-
-
-
+def end_npc_cag():
+    global _npc_cag
+    _npc_cag.end()
+    _npc_cag = None
