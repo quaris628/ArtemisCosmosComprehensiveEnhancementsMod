@@ -1,6 +1,13 @@
 ################
 ## common code for different map type
 
+if client_id == 0:
+    signal_register(signal_game_ended(), npc_cag_on_game_ended, server=True)
+
+==== npc_cag_on_game_ended ====
+    end_npc_cag()
+    ->END
+
 //shared/signal/game_started
     start_npc_cag()
 
