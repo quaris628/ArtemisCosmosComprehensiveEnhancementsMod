@@ -1,6 +1,6 @@
 from sbs_utils.mast.label import label
 from sbs_utils.procedural.cosmos import sim_create, sim_resume, sim_pause
-from sbs_utils.procedural.execution import AWAIT, END, get_shared_variable, set_shared_variable, task_schedule
+from sbs_utils.procedural.execution import AWAIT, END, get_shared_variable, set_shared_variable, task_cancel, task_schedule
 from sbs_utils.procedural.timers import delay_app
 
 from sbs_utils.procedural.signal import signal_emit
@@ -9,6 +9,7 @@ from data.missions.common.q_logger import qlog, qlog_level_info
 
 def initialize_game_state():
     _set_game_state(game_state_setting_up())
+    _set_tasks_to_end_when_game_ends([])
     signal_emit(signal_game_setup_initialized())
 
 def start_game():
@@ -57,6 +58,8 @@ def end_game():
     
     _set_game_state(game_state_ended())
     signal_emit(signal_game_ended())
+    
+    _end_tasks_on_game_end()
 
 @label()
 def _wipe_sim_on_end_game_after_delay():
@@ -93,6 +96,24 @@ def _on_change_sbs_utils_sim_state(sbs_utils_sim_state):
             _set_game_state(game_state_paused())
             signal_emit(signal_game_paused())
 
+def end_task_when_game_ends(task):
+    tasks = _get_tasks_to_end_when_game_ends()
+    
+    tasks.append(task)
+    
+    _set_tasks_to_end_when_game_ends(tasks)
+
+def _end_tasks_on_game_end():
+    tasks = _get_tasks_to_end_when_game_ends()
+    
+    for task in tasks:
+        if task is not None:
+            print(f"cancelling {task}")
+            task_cancel(task)
+    tasks = []
+    
+    _set_tasks_to_end_when_game_ends(tasks)
+
 # ---- setter/getter wrappers -----
 
 def get_game_state():
@@ -107,6 +128,14 @@ def _set_game_state(game_state):
 # as part of a workaround. Don't edit this variable name without also
 # updating its reference in gui_game_setup.mast.
 _GAME_STATE_VAR_NAME = "GAME_STATE"
+
+def _get_tasks_to_end_when_game_ends():
+    return get_shared_variable(_TASKS_TO_END_WHEN_GAME_ENDS_VAR_NAME)
+
+def _set_tasks_to_end_when_game_ends(tasks):
+    set_shared_variable(_TASKS_TO_END_WHEN_GAME_ENDS_VAR_NAME, tasks)
+
+_TASKS_TO_END_WHEN_GAME_ENDS_VAR_NAME = "_tasks_to_end_when_game_ends"
 
 # ---- Enums -----
 
