@@ -36,6 +36,12 @@ if client_id == 0:
     GAME_STATISTICS = get_game_statistics()
     GAME_STATISTICS.record_vessel_destroyed(DESTROYED_ID)
     
+    respawn_after_delay_task = task_schedule(basic_player_destroy_respawn_after_delay, data={"DESTROYED_ID": DESTROYED_ID})
+    end_task_when_game_ends(respawn_after_delay_task)
+    ->END
+    
+==== basic_player_destroy_respawn_after_delay ====
+    
     await delay_sim(2)
     so = to_object(DESTROYED_ID)
 
