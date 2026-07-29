@@ -71,7 +71,8 @@ default shared grid_data = grid_get_grid_data()
 //spawn/grid if has_role(SPAWNED_ID, "damcons")
     set_inventory_value(SPAWNED_ID, "idle", True)
     set_inventory_value(SPAWNED_ID, "idle_state", "start")
-    task_schedule(damcon_ai)
+    damcon_ai_task = task_schedule(damcon_ai)
+    end_task_when_game_ends(damcon_ai_task)
 
 
 
