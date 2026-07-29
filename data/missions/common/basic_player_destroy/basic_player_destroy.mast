@@ -35,6 +35,12 @@ signal_register(signal_before_player_ship_destroyed(), player_ship_destroyed_sen
 //shared/signal/player_ship_destroyed if PLAYER_SHIP_RESPAWN
     qlog(qlog_level_info(), "has been destroyed and will be respawned in 2 seconds", player_ship_id=DESTROYED_ID)
     
+    respawn_after_delay_task = task_schedule(basic_player_destroy_respawn_after_delay, data={"DESTROYED_ID": DESTROYED_ID})
+    end_task_when_game_ends(respawn_after_delay_task)
+    ->END
+    
+==== basic_player_destroy_respawn_after_delay ====
+    
     await delay_sim(2)
     so = to_object(DESTROYED_ID)
 
