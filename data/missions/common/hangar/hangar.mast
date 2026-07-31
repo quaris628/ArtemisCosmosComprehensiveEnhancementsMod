@@ -378,7 +378,6 @@ hangar_get_craft_data("tsn")
         
         if new_home is not None:
             signal_emit("cockpit_dock_success", {"craft_id": fighter_so.id, "home": new_home.id})
-            comms_broadcast(0,f"pilot {name} docked at {new_home.name}")
 
         if fighter_client is not None:
             set_dedicated_link(fighter_client, "craft_id", None)    
