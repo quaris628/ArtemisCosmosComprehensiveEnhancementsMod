@@ -153,6 +153,14 @@ Properties:
     amb_obj.data_set.set("ally_list","tsn,good_dudes",0)
 ## ambassador face
     set_face(amb_id, random_terran(civilian=False)) 
+    
+    setup_task = task_schedule(secret_meeting_setup_after_delay)
+    end_task_when_game_ends(setup_task)
+    
+    ->END
+    
+==== secret_meeting_setup_after_delay ====
+
 ## wait 5 seconds
     await delay_sim(5)
 
@@ -187,7 +195,7 @@ Properties:
 
 ## spawn initial skarran attack
 ## 2 ships, 4 if difficulty is 11
-    task_schedule(spawn_wave)
+    await task_schedule(spawn_wave)
 ## More if difficulty 11
     if DIFFICULTY >= 11:
         task_schedule(spawn_wave)
@@ -195,14 +203,17 @@ Properties:
     seconds_between_waves = END_GAME_DELAY * 60
     milestone = meeting_len*60-seconds_between_waves
     min_left = meeting_len
-
+    
+    meeting_task = task_schedule(meeting_in_progress)
+    end_task_when_game_ends(meeting_task)
+    ->END
 
 ###########################
 ## Now transition to a loop
 ## Watching for the meeting to end 
 ## or any end game conditions
 
---- meeting_in_progress
+==== meeting_in_progress ====
 #
 # Pause and await any of these to happen
 #  - We have delayed long enough for the next wave
@@ -219,7 +230,7 @@ Properties:
             await task_schedule(send_admiral_message, {"the_message": the_message})
 
 ##another skarran arrives
-        task_schedule(spawn_wave)
+        await task_schedule(spawn_wave)
 
         milestone -= seconds_between_waves
 
@@ -238,14 +249,15 @@ Properties:
     target_pos(amb_id, 0,0,-5200, 1.0, 0, 0)
 
 # spawn one more wave skarran to harass the player ship(s)
-    task_schedule(spawn_wave)
+    await task_schedule(spawn_wave)
 
     
 
 # This should trigger just before the end game
     await distance_point_less(amb_id, Vec3(0,0,-5200), 400)
 # Add a end game win conditions
-    task_schedule(mission_end_success)
+    mission_end_success_task = task_schedule(mission_end_success)
+    end_task_when_game_ends(mission_end_success_task)
 
 # ambassador ship is now far enough away from base
 ## Announce victory
@@ -260,11 +272,8 @@ Properties:
 
     ->END
 
----- mission_end_success ----
+==== mission_end_success ====
     await delay_sim(10)
-    
-    if not is_game_in_progress():
-        ->END
     
     GAME_STATISTICS = get_game_statistics()
     GAME_STATISTICS.record_game_end(reason="Game ended because the mission is complete, and Praetor of Peace escaped. Congratuations!", is_success=True)
