@@ -91,6 +91,11 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
     total_vertical_split_x = "51"
     right_side_horizontal_split_y = "31"
     player_ship_id = sbs.get_ship_of_client(client_id)
+    player_ship_object = to_space_object(player_ship_id)
+    if player_ship_object is None:
+        yield idle
+    VESSEL_TYPES_DATA = get_vessel_types_data()
+    player_ship_type = VESSEL_TYPES_DATA.get_ship_type_from_key(player_ship_object.art_id)
     
     gui_section(style="area:10px,450px,160px,100;")
     create_repair_levels_display(player_ship_id)
@@ -112,8 +117,9 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
     gui_row(style="row-height:8px;")
     gui_blank()
     
-    gui_row(style="row-height:30px;")
-    resistor_coils_checkbox = gui_checkbox("Warp Resistor Coils", var="are_resistor_coils_on", style=f"font:gui-1;color:{color_text()};")
+    if player_ship_type.has_warp_drive:
+        gui_row(style="row-height:30px;")
+        resistor_coils_checkbox = gui_checkbox("Warp Resistor Coils", var="are_resistor_coils_on", style=f"font:gui-1;color:{color_text()};")
     
     gui_row(style="row-height:30px;")
     apu_checkbox = gui_checkbox("APU", var="is_apu_on", style=f"font:gui-1;color:{color_text()};")
@@ -123,8 +129,9 @@ shared COMMS_PROTOTYPE  = SETTINGS.get("COMMS_PROTOTYPE", False)
             manual_set_auto_mode(player_ship_id)
         else:
             manual_set_manual_mode(player_ship_id)
-    on gui_message(resistor_coils_checkbox):
-        set_switch_state(player_ship_id, switch_identifier_warp_resistor_coils(), are_resistor_coils_on, False)
+    if player_ship_type.has_warp_drive:
+        on gui_message(resistor_coils_checkbox):
+            set_switch_state(player_ship_id, switch_identifier_warp_resistor_coils(), are_resistor_coils_on, False)
     on gui_message(apu_checkbox):
         set_switch_state(player_ship_id, switch_identifier_apu(), is_apu_on, False)
     signal_register(signal_energy_management_controls_non_manual_change_checkbox(player_ship_id), non_manual_change_energy_management_controls_checkbox, is_temporary=True)
