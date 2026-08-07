@@ -15,17 +15,19 @@ def get_all_enemy_ids(except_enemy_id=None):
 # ----- Setter/getter wrappers -----
 
 def reset_game_end_conditions():
-    set_game_end_conditions(end_if_no_enemies=None, end_if_no_ally_stations=None)
+    set_game_end_conditions(end_if_no_enemies=None, end_if_no_ally_stations=None, end_if_no_player_ships=None)
 
 # There's also a timer which can end the game. It's always respected if it's set.
 # end_if_no_enemies default is True
 # end_if_no_ally_stations default is True
+# end_if_no_player_ships default is True
 # TODO also provide override for no player ships, e.g. for all-fighter custom mission script
 # And/or maybe provide override for whether single-seat craft should count as player ships
 # for the purposes of whether the game ends
-def set_game_end_conditions(end_if_no_enemies=None, end_if_no_ally_stations=None):
+def set_game_end_conditions(end_if_no_enemies=None, end_if_no_ally_stations=None, end_if_no_player_ships=None):
     set_shared_variable(_IS_END_IF_NO_ENEMIES_ENABLED_VAR_NAME, end_if_no_enemies)
     set_shared_variable(_IS_END_IF_NO_ALLY_STATIONS_ENABLED_VAR_NAME, end_if_no_ally_stations)
+    set_shared_variable(_IS_END_IF_NO_PLAYER_SHIPS_ENABLED_VAR_NAME, end_if_no_player_ships)
  
 def is_end_if_no_enemies_enabled():
     is_enabled = get_shared_variable(_IS_END_IF_NO_ENEMIES_ENABLED_VAR_NAME)
@@ -39,5 +41,12 @@ def is_end_if_no_ally_stations_enabled():
         return True
     return is_enabled
 
+def is_end_if_no_player_ships_enabled():
+    is_enabled = get_shared_variable(_IS_END_IF_NO_PLAYER_SHIPS_ENABLED_VAR_NAME)
+    if is_enabled is None:
+        return True
+    return is_enabled
+
 _IS_END_IF_NO_ENEMIES_ENABLED_VAR_NAME = "_is_end_if_no_enemies_enabled"
 _IS_END_IF_NO_ALLY_STATIONS_ENABLED_VAR_NAME = "_is_end_if_no_ally_stations_enabled"
+_IS_END_IF_NO_PLAYER_SHIPS_ENABLED_VAR_NAME = "_is_end_if_no_player_ships_enabled"
