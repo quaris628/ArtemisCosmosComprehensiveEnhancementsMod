@@ -61,6 +61,8 @@ Properties:
     Time Limit: 'gui_input("desc: Minutes;", var="GAME_TIME_LIMIT", listbox_container=gui_get_variable("map_options_listbox"))'
 ```
     
+    GAME_SETUP_DATA = get_game_setup_data()
+    seed_value = GAME_SETUP_DATA.seed_value
     if seed_value != 0:
         random.seed(seed_value)
         print(f"Seed Value: {seed_value}")
@@ -102,14 +104,11 @@ Properties:
 
 #delay a bit
     await delay_sim(10)
-
-# do the end screen
-    START_TEXT = f"{station_name} was destroyed. You saved {num_stations_spawned-1} stations at DIFFICULTY {DIFFICULTY}."
-    GAME_STARTED = False
-    GAME_ENDED = True
-
-    sbs.play_music_file(0,"music/default/failure")
-    signal_emit("show_game_results", None)
+    
+    GAME_STATISTICS = get_game_statistics()
+    GAME_STATISTICS.record_game_end(reason=f"Game ended because {station_name} was destroyed. You saved {num_stations_spawned-1} stations.", is_success=False)
+    end_game()
+    
     ->END
 
 
@@ -132,12 +131,10 @@ Properties:
         await delay_sim(10)
 
 # do the end screen
-        START_TEXT = f"All TSN ships destroyed. You saved {num_stations_spawned-1} stations at DIFFICULTY {DIFFICULTY}."
-        GAME_STARTED = False
-        GAME_ENDED = True
-
-        sbs.play_music_file(0,"music/default/failure")
-        signal_emit("show_game_results", None)
+        GAME_STATISTICS = get_game_statistics()
+        GAME_STATISTICS.record_game_end(reason=f"Game ended because all TSN ships destroyed. You saved {num_stations_spawned-1} stations.", is_success=False)
+        end_game()
+        
         ->END
 # If there are still player ships, keep the task running
 # after waiting three seconds
