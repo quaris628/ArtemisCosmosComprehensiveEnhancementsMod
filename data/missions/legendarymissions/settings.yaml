@@ -192,4 +192,6 @@ CONSOLE_EXCLUSIVITIES:
 ENABLE_ANIMATED_SKYBOX_BACKGROUND_HACK: false
 
 # Allow starting a new game without requiring the mission script to be restarted.
-ENABLE_NEW_GAME_WO_SCRIPT_RESTART: true
+# Currently runs into serious bugs in science, and is intended for developer use only.
+# The hope is to eventually get this working well enough to be enabled by default.
+ENABLE_NEW_GAME_WO_SCRIPT_RESTART: false
