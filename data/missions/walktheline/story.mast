@@ -71,16 +71,28 @@ Properties:
         random.seed(seed_value)
         print(f"Random Seed Value: {seed_value}")
     
+    shared next_pos = Vec3(0, 0, 0)
+    shared phoenix_id = None
+    shared num_stations_spawned = 0
+    localTickCounter = -1
+    emptySpaceCounter = 0
+    
 # create new station and enemies function----------------------------------------------------------------------------------------------------
-    task_schedule(create_new_station)
+    create_new_station_task = task_schedule(create_new_station)
+    end_task_when_game_ends(create_new_station_task)
 
 # player ship ----------------------------------------------------------------------------------------------------
     await task_schedule(spawn_players)
 # Setup docking
     await task_schedule(docking_standard_player_station)
+    
+    set_game_end_conditions(end_if_no_enemies=False, end_if_no_ally_stations=False, end_if_no_player_ships=False)
+    # The game should still end if there are no player ships,
+    # but this script will use a custom trigger to determine that.
 # 
 # Run a task to check if all players are dead----------------------------------------------------------------------------------------------------
-    task_schedule(check_players)
+    check_players_task = task_schedule(check_players)
+    end_task_when_game_ends(check_players_task)
     ->END
         
 
@@ -101,7 +113,13 @@ Properties:
 
     textLine = f"{textLine} - {station_name} has been destroyed!  Your mission has come to a glorious conclusion.  You fought for the safety of {num_stations_spawned} stations!  You will be remembered."
     send_general_message("Admiral Harkin", textLine, admiral_face, 0)
-
+    
+    after_delay_task = task_schedule(walk_the_line_on_station_destroyed_after_delay, data={"station_name": station_name })
+    end_task_when_game_ends(after_delay_task)
+    ->END
+    
+==== walk_the_line_on_station_destroyed_after_delay ====
+    
 #delay a bit
     await delay_sim(10)
     
