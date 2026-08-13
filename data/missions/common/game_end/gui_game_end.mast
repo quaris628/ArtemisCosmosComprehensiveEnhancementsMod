@@ -61,66 +61,58 @@ signal_register(signal_game_ended(), "gui_game_end_on_game_ended")
     
     # ----- main section-----
     
-    # 216px = 180px from top banner + 36px from tabs
-    gui_section(style=f"area:0,216px,100,100-61px;")
-    
-    #gui_row()
+    # 226px = 180px from banner + 36px from tabs + 10px padding
+    # 66px = 61px from bottom text/button + 5px padding
+    gui_section(style=f"area:0+10px,226px,100-10px,100-66px;")
     
     # ----- left body -----
     
-    with gui_sub_section(style=f"padding:10px,10px,5px,5px;background:{color_background()};"):
+    with gui_sub_section(style=f"background:{color_background()};"):
+        gui_blank(style="col-width:10px;")
+        with gui_sub_section():
+            gui_row(style="row-height:5px;")
+            gui_blank()
+            
+            create_offensive_combat_stats_text(GAME_STATISTICS, "Surrendered", "Destroyed", "0 Surrendered, 0 Destroyed")
         
-        remaining_enemies = GAME_STATISTICS.get_remaining_enemies()
-        if 0 < remaining_enemies:
-            create_label_value_pair("Enemies Remaining", str(remaining_enemies), "yellow")
-        if 0 < GAME_STATISTICS.get_destroyed_count():
-            gui_row(style="row-height:32px;padding:8px,4px,8px,0;")
-            # $text is necessary in order to display a colon
-            # https://github.com/artemis-sbs/LegendaryMissions/issues/566#issuecomment-4291760757
-            gui_text("$text:Vessels Destroyed:;", style="font:gui-3;justify:right;color:yellow;")
-            ~~
-            for origin, destroyed_count in GAME_STATISTICS.get_origin_destroyed_counts_iterable():
-                if 0 < destroyed_count:
-                    # TODO Make origin's display string more properly configurable
-                    if origin == "tsn":
-                        origin_display_string = "TSN"
-                    else:
-                        origin_display_string = origin.capitalize()
-                    create_label_value_pair(origin_display_string, str(destroyed_count), "yellow")
-            ~~
+        gui_blank(style="col-width:10px;")
+    
+    gui_blank(style=f"col-width:10px;")
     
     # ----- right body -----
     
-    with gui_sub_section(style=f"padding:5px,10px,10px,5px;background:{color_background()};"):
-    
-        create_label_value_pair("Player Ships Lost", str(GAME_STATISTICS.get_player_ships_destroyed_count()), "lime")
-        create_label_value_pair("Player Single-seat Craft Lost", str(GAME_STATISTICS.get_friendly_single_seat_destroyed_count()), "lime")
-        create_label_value_pair("Friendly Stations Lost", str(GAME_STATISTICS.get_friendly_stations_destroyed_count()), "lime")
-        # TODO don't hardcode/assume tsn is equivalent to friendly
-        create_label_value_pair("Friendly Ships Lost", str(GAME_STATISTICS.get_origin_destroyed_count("tsn")), "lime")
-        create_label_value_pair("Surrendered Ships Killed", str(GAME_STATISTICS.get_surrendered_killed_count()), "lime")
+    with gui_sub_section(style=f"background:{color_background()};"):
+        gui_blank(style="col-width:10px;")
+        with gui_sub_section():
+            gui_row(style="row-height:5px;")
+            gui_blank()
+            
+            create_allied_losses_stats_text(GAME_STATISTICS, "Player/Friendly Losses")
+            create_divider()
+            
+            create_label_value_pair("Player Beams Fired", str(GAME_STATISTICS.get_player_beams_fired_count()), color_game_end_misc())
+            # TODO count player ordinance firing, once mast hook for the engine event gets implemented
+            # https://github.com/artemis-sbs/LegendaryMissions/issues/385
+            #create_label_value_pair("Player Ordinance Fired", str(GAME_STATISTICS.get_player_ordinance_fired_count()), color_game_end_misc())
+            # TODO: mines detonated, if the ability to (reliably) track this is ever added
+            create_label_value_pair("Successful Dock Attempts", str(GAME_STATISTICS.get_player_successful_docks_count()), color_game_end_misc())
+            create_label_value_pair("Anomalies Collected", str(GAME_STATISTICS.get_player_picked_up_anomaly_count()), color_game_end_misc())
+            # TODO count mines detonated
+            # I don't think it's possible to detect whether damage was from a mine
+            # from code triggered by //damage/object but maybe this will change
+            # if this inconsistent damage parent id bug ever gets fixed.
+            # https://github.com/artemis-sbs/LegendaryMissions/issues/495
+            #create_label_value_pair("Mine Detonations", "?")
+            
+            # Artemis 2.8 also displays a count of space monsters tagged,
+            # but 1) tags aren't implemented in Cosmos yet,
+            # 2) space monsters aren't fully fleshed out in Cosmos yet, and
+            # 3) this count just doesn't seem very important to me anyway,
+            # so I figure it's not worth implementing (probably ever).
+            
+            create_label_value_pair("Mission Duration (minutes)", str(GAME_STATISTICS.get_duration_in_minutes()), color_game_end_misc())
         
-        # Artemis 2.8 also displays a count of space monsters tagged,
-        # but 1) tags aren't implemented in Cosmos yet,
-        # 2) space monsters aren't fully fleshed out in Cosmos yet, and
-        # 3) this count just doesn't seem very important to me anyway,
-        # so I figure it's not worth implementing (probably ever).
-        
-        create_label_value_pair("Ships Surrendered", str(GAME_STATISTICS.get_surrendered_count()), "yellow")
-        create_label_value_pair("Player Beams Fired", str(GAME_STATISTICS.get_player_beams_fired_count()), "yellow")
-        # TODO count player ordinance firing, once mast hook for the engine event gets implemented
-        # https://github.com/artemis-sbs/LegendaryMissions/issues/385
-        #create_label_value_pair("Player Ordinance Fired", str(GAME_STATISTICS.get_player_ordinance_fired_count()), "yellow")
-        
-        create_label_value_pair("Successful Dock Attempts", str(GAME_STATISTICS.get_player_successful_docks_count()), "white")
-        create_label_value_pair("Anomalies Collected", str(GAME_STATISTICS.get_player_picked_up_anomaly_count()), "white")
-        # TODO count mines detonated
-        # I don't think it's possible to detect whether damage was from a mine
-        # from code triggered by //damage/object but maybe this will change
-        # if this inconsistent damage parent id bug ever gets fixed.
-        # https://github.com/artemis-sbs/LegendaryMissions/issues/495
-        #create_label_value_pair("Mine Detonations", "?")
-        create_label_value_pair("Mission Duration (minutes)", str(GAME_STATISTICS.get_duration_in_minutes()), "white")
+        gui_blank(style="col-width:10px;")
     
     jump gui_game_end_common
     
@@ -175,44 +167,100 @@ signal_register(signal_game_ended(), "gui_game_end_on_game_ended")
     
     # ----- main section-----
     
-    # 216px = 180px from banner + 36px from tabs
-    gui_section(style=f"area:0,216px,100,100-61px;")
+    # 226px = 180px from banner + 36px from tabs + 10px padding
+    # 66px = 61px from bottom text/button + 5px padding
+    gui_section(style=f"area:0+10px,226px,100-10px,100-66px;")
     
     player_ship_statistics = GAME_STATISTICS.get_player_ship_statistics_by_number(SHIP_NUMBER)
     ship_type = VESSEL_TYPES_DATA.get_ship_type_from_key(player_ship_statistics.ship_type_key)
     
     # ----- left body -----
     
-    with gui_sub_section(style=f"padding:10px,10px,5px,5px;background:{color_background()};"):
-        gui_row(style="row-height:36px;")
-        gui_text(player_ship_statistics.name, style=f"font:gui-4;justify:left;color:{color_text()};")
+    with gui_sub_section(style=f"background:{color_background()};"):
+        gui_blank(style="col-width:10px;")
+        with gui_sub_section():
+            gui_row(style="row-height:5px;")
+            gui_blank()
+            
+            gui_row(style="row-height:36px;")
+            gui_text(player_ship_statistics.name, style=f"font:gui-4;justify:left;color:{color_text()};")
+            gui_row(style="row-height:32px;")
+            gui_text(ship_type.get_full_name(), style=f"font:gui-3;justify:left;color:{color_text_secondary()};")
+            gui_row(style="row-height:32px;")
+            if GAME_SETUP_DATA.is_respawn_players_enabled: # count deaths
+                if 1 < player_ship_statistics.deaths_count:
+                    gui_text(f"Destroyed {player_ship_statistics.deaths_count} times", style=f"font:gui-3;justify:left;color:#f44;")
+                elif 1 == player_ship_statistics.deaths_count:
+                    gui_text(f"Destroyed 1 time", style=f"font:gui-3;justify:left;color:#f44;")
+                else:
+                    gui_text("Survived the entire game", style=f"font:gui-3;justify:left;color:lime;")
+            else: # respawn players disabled - either dead or alive
+                if not player_ship_statistics.was_destroyed:
+                    gui_text("Survived", style=f"font:gui-3;justify:left;color:lime;")
+                elif not GAME_SETUP_DATA.is_respawn_players_enabled:
+                    gui_text("Destroyed", style=f"font:gui-3;justify:left;color:#f44;")
+            
+            create_divider()
+            
+            create_offensive_combat_stats_text(player_ship_statistics, "Surrenders", "Kills", "No Surrenders or Kills")
         
-        gui_row(style="row-height:32px;")
-        gui_text(ship_type.get_full_name(), style=f"font:gui-3;justify:left;color:{color_text_secondary()};")
-        
-        gui_row(style="row-height:32px;")
-        if player_ship_statistics.was_destroyed:
-            gui_text("Destroyed", style=f"font:gui-3;justify:left;color:#f44;")
-        else:
-            gui_text("Survived", style=f"font:gui-3;justify:left;color:lime;")
+        gui_blank(style="col-width:10px;")
+    
+    gui_blank(style=f"col-width:10px;")
     
     # ----- right body -----
     
-    with gui_sub_section(style=f"padding:5px,10px,10px,5px;background:{color_background()};"):
-        if player_ship_statistics.was_destroyed:
+    with gui_sub_section(style=f"background:{color_background()};"):
+        gui_blank(style="col-width:10px;")
+        with gui_sub_section():
+            gui_row(style="row-height:5px;")
             gui_blank()
-        else:
-            gui_row(style="row-height:32px;padding:8px,4px,8px,0;")
-            # $text is necessary in order to display a colon
-            # https://github.com/artemis-sbs/LegendaryMissions/issues/566#issuecomment-4291760757
-            gui_text("$text:Remaining Supplies:;", style="font:gui-3;justify:right;color:yellow;")
             
-            create_label_value_pair("Energy", f"{player_ship_statistics.remaining_energy:.0f}", "yellow")
+            create_allied_losses_stats_text(player_ship_statistics, "Friendly Fire Kills")
+            if player_ship_statistics.was_permabanned_from_tsn:
+                gui_row(style="row-height:32px;")
+                gui_text("Banned from TSN Stations", style=f"font:gui-3;justify:left;color:{color_game_end_losses()};")
             
-            ~~
-            for ordinance_type, count in player_ship_statistics.remaining_ordinance.items():
-                create_label_value_pair(ordinance_type, str(count), "yellow")
-            ~~
+            create_divider()
+            
+            create_label_value_pair("Player Beams Fired", str(player_ship_statistics.get_player_beams_fired_count()), color_game_end_misc())
+            # TODO count player ordinance firing, once mast hook for the engine event gets implemented
+            # https://github.com/artemis-sbs/LegendaryMissions/issues/385
+            #create_label_value_pair("Player Ordinance Fired", str(GAME_STATISTICS.get_player_ordinance_fired_count()), color_game_end_misc())
+            # TODO: mines detonated, if the ability to (reliably) track this is ever added
+            create_label_value_pair("Successful Dock Attempts", str(player_ship_statistics.get_player_successful_docks_count()), color_game_end_misc())
+            create_label_value_pair("Anomalies Collected", str(player_ship_statistics.get_player_picked_up_anomaly_count()), color_game_end_misc())
+            
+            # Artemis 2.8 also displays a count of space monsters tagged,
+            # but 1) tags aren't implemented in Cosmos yet,
+            # 2) space monsters aren't fully fleshed out in Cosmos yet, and
+            # 3) this count just doesn't seem very important to me anyway,
+            # so I figure it's not worth implementing (probably ever).
+            
+            if (not player_ship_statistics.was_destroyed) or GAME_SETUP_DATA.is_respawn_players_enabled:
+                if player_ship_statistics.could_loot:
+                    gui_row(style="row-height:32px;")
+                    # $text is necessary in order to display a colon
+                    # https://github.com/artemis-sbs/LegendaryMissions/issues/566#issuecomment-4291760757
+                    gui_text("$text:Supplies Looted, Remaining:;", style=f"font:gui-3;justify:left;color:{color_game_end_misc()};")
+                    create_label_value_value_triplet("Energy", str(player_ship_statistics.looted_energy), f"{player_ship_statistics.remaining_energy:.0f}", color_game_end_misc())
+                    ~~
+                    for ordinance_type, count in player_ship_statistics.remaining_ordinance.items():
+                        looted_ordinance = player_ship_statistics.looted_ordinance[ordinance_type]
+                        create_label_value_value_triplet(ordinance_type, str(looted_ordinance), str(count), color_game_end_misc())
+                    ~~
+                else: # not player_ship_statistics.could_loot
+                    gui_row(style="row-height:32px;")
+                    # $text is necessary in order to display a colon
+                    # https://github.com/artemis-sbs/LegendaryMissions/issues/566#issuecomment-4291760757
+                    gui_text("$text:Supplies Remaining:;", style=f"font:gui-3;justify:left;color:{color_game_end_misc()};")
+                    create_label_value_pair("Energy", f"{player_ship_statistics.remaining_energy:.0f}", color_game_end_misc())
+                    ~~
+                    for ordinance_type, count in player_ship_statistics.remaining_ordinance.items():
+                        create_label_value_pair(ordinance_type, str(count), color_game_end_misc())
+                    ~~
+                    
+        gui_blank(style="col-width:10px;")
     
     jump gui_game_end_common
 

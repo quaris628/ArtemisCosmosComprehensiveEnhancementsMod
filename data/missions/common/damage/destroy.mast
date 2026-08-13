@@ -33,6 +33,10 @@
         set_killed_tsn(destroyed_by_ship_id)
         
         if old_docking_privileges == dock_attempt_result_allowed_pirate_uneasy_alliance() or old_docking_privileges == dock_attempt_result_disallowed_piracy():
+            GAME_STATISTICS = get_game_statistics()
+            player_ship_statistics = GAME_STATISTICS.get_player_ship_statistics_by_id(destroyed_by_ship_id)
+            player_ship_statistics.record_tsn_permaban()
+            
             # Send the "Desperate plea" message, and then station admin message
             await task_schedule(send_desperate_plea_message, data={"DESTROYED_ID": DAMAGE_SELECTED_ID})
             set_already_sent_desperate_plea(DAMAGE_SELECTED_ID)
@@ -122,11 +126,16 @@
 
 //damage/destroy
     GAME_STATISTICS = get_game_statistics()
-    GAME_STATISTICS.record_vessel_destroyed(DESTROYED)
+    GAME_STATISTICS.record_vessel_destroyed(DESTROYED_ID)
+    ->END
 
-//damage/killed if has_role(DAMAGE_SELECTED_ID, "surrendered")
+//damage/killed if get_player_capital_ship_attributed_to_damage(DAMAGE_SOURCE_ID, DAMAGE_PARENT_ID) is not None
+    # //damage/killed does NOT run for player ships
+    # (However, //damage/destroy does run for player ships)
+    # https://github.com/artemis-sbs/LegendaryMissions/issues/709
     destroyed_by_player_ship_id = get_player_capital_ship_attributed_to_damage(DAMAGE_SOURCE_ID, DAMAGE_PARENT_ID)
-    if destroyed_by_player_ship_id is not None:
-        killed_ship_obj = to_space_object(DAMAGE_SELECTED_ID)
-        GAME_STATISTICS = get_game_statistics()
-        GAME_STATISTICS.record_player_killed_surrendered(destroyed_by_player_ship_id, killed_ship_obj)
+    if destroyed_by_player_ship_id is None:
+        ->END
+    GAME_STATISTICS = get_game_statistics()
+    GAME_STATISTICS.record_player_killed(destroyed_by_player_ship_id, DAMAGE_TARGET_ID)
+    ->END
