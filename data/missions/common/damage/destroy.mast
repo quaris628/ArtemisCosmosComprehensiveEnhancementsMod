@@ -42,6 +42,7 @@
             set_already_sent_desperate_plea(DAMAGE_SELECTED_ID)
             # Must wait for the engine to process the desperate plea message,
             # otherwise it might appear after the station admin message.
+            # TODO end task if game ends
             await delay_sim(0.1)
             
             if old_docking_privileges == dock_attempt_result_allowed_pirate_uneasy_alliance():
