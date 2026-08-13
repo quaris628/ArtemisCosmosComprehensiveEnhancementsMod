@@ -3,6 +3,7 @@ from sbs_utils.procedural.comms import comms_broadcast, comms_receive_internal
 from sbs_utils.procedural.execution import set_variable
 
 from data.missions.common.pirate_features_definitions import is_looted, set_looted, looting_comms_messages_color
+from data.missions.common.controller_game_statistics import get_game_statistics
 
 from surrendered_navigation import clear_all_prepared_for_boarding
 
@@ -25,6 +26,10 @@ def loot(looted_ship_object, looted_by_player_ship_object):
     if is_looted(looted_ship_object.id):
         return
     set_looted(looted_ship_object.id)
+    
+    GAME_STATISTICS = get_game_statistics()
+    player_ship_statistics = GAME_STATISTICS.get_player_ship_statistics_by_id(looted_by_player_ship_object.id)
+    
     clear_all_prepared_for_boarding(looted_ship_object.id)
     
     shield_max_avg = get_average_max_shields(looted_ship_object.data_set)
@@ -89,6 +94,12 @@ def loot(looted_ship_object, looted_by_player_ship_object):
     player_ship_blob.set("EMP_NUM", looted_emps + player_ship_blob.get("EMP_NUM", 0), 0)
     player_ship_blob.set("Mine_NUM", looted_mines + player_ship_blob.get("Mine_NUM", 0), 0)
     player_ship_blob.set("Nuke_NUM", looted_nukes + player_ship_blob.get("Nuke_NUM", 0), 0)
+    
+    player_ship_statistics.record_looted_energy(looted_energy)
+    player_ship_statistics.record_looted_ordinance("Homing", looted_homings)
+    player_ship_statistics.record_looted_ordinance("Nuke", looted_nukes)
+    player_ship_statistics.record_looted_ordinance("EMP", looted_emps)
+    player_ship_statistics.record_looted_ordinance("Mine", looted_mines)
     
     # ----- Notification of all the aforementioned loot -----
     
