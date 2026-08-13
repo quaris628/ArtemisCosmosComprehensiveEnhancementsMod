@@ -1,34 +1,26 @@
 from math import floor
 
 from sbs_utils.helpers import FrameContext
-from sbs_utils.procedural.roles import role, all_roles, has_role, has_roles
+from sbs_utils.procedural.roles import role, all_roles, has_role
 from sbs_utils.procedural.query import to_space_object
 
-from data.missions.common.controller_vessel_types_data import get_vessel_types_data
-
+from data.missions.common.model_game_and_players_statistics import GameAndPlayersStatistics
 from data.missions.common.model_player_ship_statistics import PlayerShipStatistics
 
 # Many functions have unused parameters.
 # This is to make it easier to start recording the data in those
 # parameters in the future, even though they aren't tracked right now.
 
-class GameStatistics:
+class GameStatistics(GameAndPlayersStatistics):
     
     def __init__(self):
+        # Note that python does not impicitly call super().__init__()
+        # Its omission here is intentional, since it'd be redundant with the
+        # super().record_game_start() call inside self.record_game_start()
         self.record_game_start()
     
     def record_game_start(self):
-        self._destroyed_counts_by_origin = {}
-        for origin in get_vessel_types_data().get_all_origins():
-            self._destroyed_counts_by_origin[origin.lower()] = 0
-        self._friendly_stations_destroyed_count = 0
-        self._friendly_single_seat_destroyed_count = 0
-        self._surrendered_count = 0
-        self._surrendered_killed_count = 0
-        self._player_beams_fired_count = 0
-        self._player_ordinance_fired_count = 0
-        self._player_successful_docks_count = 0
-        self._picked_up_anomaly_count = 0
+        super().record_game_start()
         self._start_tick_count = FrameContext.sim.time_tick_counter
         self._duration_in_seconds = None
         self._reason_for_end = None
@@ -39,101 +31,6 @@ class GameStatistics:
     def record_player_ship_added(self, ship_number, ship_id, ship_type_key, name):
         player_ship_statistics = PlayerShipStatistics(ship_number, ship_type_key, name)
         self._player_ships_statistics[ship_id] = player_ship_statistics
-    
-    # ----- vessel destroyed -----
-    
-    def record_vessel_destroyed(self, vessel_object):
-        if has_roles(vessel_object.id, "cockpit,__player__"):
-            self._friendly_single_seat_destroyed_count += 1
-        elif has_role(vessel_object.id, "__player__"):
-            self._player_ships_statistics[vessel_object.id].record_destroyed(vessel_object)
-        
-        # TODO probably shouldn't hardcode "tsn" to be equivalent to friendly
-        if has_roles(vessel_object.id, "station,tsn"):
-            self._friendly_stations_destroyed_count += 1
-        
-        # Anomalies (and probably other things too?) have their origin set to "no origin"
-        # And these probably shouldn't be counted in the vessels destroyed counts
-        if vessel_object.origin is None or vessel_object.origin == "no origin":
-            return
-        
-        lowercase_origin = vessel_object.origin.lower()
-        if lowercase_origin in self._destroyed_counts_by_origin:
-            self._destroyed_counts_by_origin[lowercase_origin] += 1
-        else:
-            self._destroyed_counts_by_origin[lowercase_origin] = 1
-    
-    def get_origin_destroyed_count(self, origin):
-        if origin not in self._destroyed_counts_by_origin:
-            return 0
-        return self._destroyed_counts_by_origin[origin]
-    
-    def get_origin_destroyed_counts_iterable(self):
-        return self._destroyed_counts_by_origin.items()
-    
-    def get_destroyed_count(self):
-        return sum(self._destroyed_counts_by_origin.values())
-    
-    def get_player_ships_destroyed_count(self):
-        return sum(1 for player_ship_statistics in self._player_ships_statistics.values() if player_ship_statistics.was_destroyed)
-    
-    def get_friendly_stations_destroyed_count(self):
-        return self._friendly_stations_destroyed_count
-    
-    def get_friendly_single_seat_destroyed_count(self):
-        return self._friendly_single_seat_destroyed_count
-    
-    # ----- vessel surrendered -----
-    
-    def record_vessel_surrendered(self, vessel_object): # pylint: disable=unused-argument
-        self._surrendered_count += 1
-    
-    def get_surrendered_count(self):
-        return self._surrendered_count
-    
-    # ----- player killed surrendered -----
-    
-    def record_player_killed_surrendered(self, player_ship_id, surrendered_ship_object): # pylint: disable=unused-argument
-        self._surrendered_killed_count += 1
-    
-    def get_surrendered_killed_count(self):
-        return self._surrendered_killed_count
-    
-    # ----- player fired beam -----
-    
-    def record_player_fired_beam(self, player_ship_id): # pylint: disable=unused-argument
-        self._player_beams_fired_count += 1
-    
-    def get_player_beams_fired_count(self):
-        return self._player_beams_fired_count
-    
-    # ----- player fired ordinance -----
-    
-    # TODO record this; waiting on sbs_utils feature to be implemented
-    # https://github.com/artemis-sbs/LegendaryMissions/issues/385
-    
-    def record_player_fired_ordinance(self, player_ship_id): # pylint: disable=unused-argument
-        self._player_ordinance_fired_count += 1
-    
-    def get_player_ordinance_fired_count(self):
-        #return self._player_ordinance_fired_count
-        return "?"
-    
-    # ----- player successfully docked -----
-    
-    def record_player_successful_dock(self, player_ship_id): # pylint: disable=unused-argument
-        self._player_successful_docks_count += 1
-    
-    def get_player_successful_docks_count(self):
-        return self._player_successful_docks_count
-    
-    # ----- picked up anomaly -----
-    
-    def record_player_picked_up_anomaly(self, player_ship_id): # pylint: disable=unused-argument
-        self._picked_up_anomaly_count += 1
-    
-    def get_player_picked_up_anomaly_count(self):
-        return self._picked_up_anomaly_count
     
     # ----- end-of-game -----
     
@@ -194,3 +91,42 @@ class GameStatistics:
     
     def get_all_player_ships_statistics(self):
         return sorted(self._player_ships_statistics.values())
+
+    # ----- overrides (and related functions) -----
+    
+    def record_vessel_destroyed(self, dead_vessel_id):
+        super().record_vessel_destroyed(dead_vessel_id)
+        if has_role(dead_vessel_id, "__player__") and not has_role(dead_vessel_id, "cockpit"):
+            self._player_ships_statistics[dead_vessel_id].record_self_destroyed()
+    
+    def record_player_killed(self, player_ship_id, dead_vessel_id):
+        # If a vessel is destroyed by any source, including a player ship,
+        # then GameStatistics.record_vessel_destroyed should get called.
+        # If a vessel is killed by a player ship, then record_player_killed
+        # should ALSO get called.
+        # So, do NOT call super().record_vessel_destroyed() here, to avoid
+        # calling it twice for the same vessel.
+        self._player_ships_statistics[player_ship_id].record_vessel_destroyed(dead_vessel_id)
+    
+    def record_vessel_surrendered(self, player_ship_id, surrendered_vessel_object):
+        super().record_vessel_surrendered(surrendered_vessel_object)
+        self._player_ships_statistics[player_ship_id].record_vessel_surrendered(surrendered_vessel_object)
+    
+    def record_player_fired_beam(self, player_ship_id):
+        super().record_player_fired_beam()
+        self._player_ships_statistics[player_ship_id].record_player_fired_beam()
+    
+    # TODO record this; waiting on sbs_utils feature to be implemented
+    # https://github.com/artemis-sbs/LegendaryMissions/issues/385
+    
+    def record_player_fired_ordinance(self, player_ship_id):
+        super().record_player_fired_ordinance()
+        self._player_ships_statistics[player_ship_id].record_player_fired_ordinance()
+    
+    def record_player_successful_dock(self, player_ship_id):
+        super().record_player_successful_dock()
+        self._player_ships_statistics[player_ship_id].record_player_successful_dock()
+    
+    def record_player_picked_up_anomaly(self, player_ship_id):
+        super().record_player_picked_up_anomaly()
+        self._player_ships_statistics[player_ship_id].record_player_picked_up_anomaly()
