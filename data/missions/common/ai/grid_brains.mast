@@ -1,4 +1,6 @@
 
+# TODO: what schedules these? Do they need to be stopped before game restart?
+
 === ai_fix_damage
     any_damage = to_grid_object(grid_closest(UPGRADE_AGENT_ID,role("__damaged__")))
     ->END if any_damage is None

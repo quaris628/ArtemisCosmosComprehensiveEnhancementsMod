@@ -13,6 +13,8 @@
     
     jump looting_rendezvous_loop
 
+# TODO end task when game ends
+
 ======== looting_rendezvous_loop =========
     
     await delay_sim(1)
