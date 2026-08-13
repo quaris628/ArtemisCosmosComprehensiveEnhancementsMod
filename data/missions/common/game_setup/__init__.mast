@@ -7,6 +7,7 @@ import ../../common/model_player_capital_ship_type.py
 import ../../common/model_vessel_types_data.py
 import ../../common/controller_vessel_types_data.py
 
+import ../../common/model_game_and_players_statistics.py
 import ../../common/model_game_statistics.py
 import ../../common/controller_game_statistics.py
 

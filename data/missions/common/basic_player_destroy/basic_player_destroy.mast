@@ -33,6 +33,9 @@ if client_id == 0:
 //shared/signal/player_ship_destroyed if get_game_setup_data().is_respawn_players_enabled
     qlog(qlog_level_info(), "has been destroyed and will be respawned in 2 seconds", player_ship_id=DESTROYED_ID)
     
+    GAME_STATISTICS = get_game_statistics()
+    GAME_STATISTICS.record_vessel_destroyed(DESTROYED_ID)
+    
     await delay_sim(2)
     so = to_object(DESTROYED_ID)
 

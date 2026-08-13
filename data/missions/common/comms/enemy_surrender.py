@@ -114,7 +114,7 @@ def _set_surrendered(ship_object, player_ship_object, via_code_case=False):
     fleet_remove_ship(ship_object.id)
     
     GAME_STATISTICS = get_game_statistics()
-    GAME_STATISTICS.record_vessel_surrendered(ship_object)
+    GAME_STATISTICS.record_vessel_surrendered(player_ship_object.id, ship_object)
     
     # Hide beam arcs on 2d maps
     ship_object.data_set.set("beamCount", 0)
