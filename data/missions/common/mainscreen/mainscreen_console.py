@@ -1,6 +1,8 @@
 from sbs_utils.procedural.inventory import get_inventory_value, set_inventory_value
 from sbs_utils.procedural.settings import settings_get_defaults
 
+from data.missions.common.q_logger import qlog, qlog_level_info
+
 # ----- setter/getter wrappers -----
 
 # View could be; 3d_view, lrs, tactical, data
@@ -10,9 +12,13 @@ from sbs_utils.procedural.settings import settings_get_defaults
 
 def initialize_mainscreen_view_facing_and_mode(player_ship_id):
     SETTINGS = settings_get_defaults()
-    set_mainscreen_view(player_ship_id, SETTINGS.get("DEFAULT_MAINSCREEN_VIEW", "3d_view"))
-    set_mainscreen_facing(player_ship_id, SETTINGS.get("DEFAULT_MAINSCREEN_FACING", "front"))
-    set_mainscreen_mode(player_ship_id, SETTINGS.get("DEFAULT_MAINSCREEN_MODE", "chase"))
+    view = SETTINGS.get("DEFAULT_MAINSCREEN_VIEW", "3d_view")
+    facing = SETTINGS.get("DEFAULT_MAINSCREEN_FACING", "front")
+    mode = SETTINGS.get("DEFAULT_MAINSCREEN_MODE", "chase")
+    set_mainscreen_view(player_ship_id, view)
+    set_mainscreen_facing(player_ship_id, facing)
+    set_mainscreen_mode(player_ship_id, mode)
+    qlog(qlog_level_info(), f"initialize_mainscreen_view_facing_and_mode view={view} facing={facing} mode={mode}", player_ship_id=player_ship_id)
 
 def get_mainscreen_view(player_ship_id):
     return get_inventory_value(player_ship_id, _INVENTORY_KEY_MAINSCREEN_VIEW)

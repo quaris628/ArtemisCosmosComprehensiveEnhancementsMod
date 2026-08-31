@@ -8,8 +8,13 @@ set_is_console_ship_specific("mainscreen", True)
 @console/mainscreen !0 ^30 "Mainscreen View" if MAINSCREEN_CONSOLE_ENABLED
     " The main viewscreen
     
+    qlog(qlog_level_info(), f"@console/mainscreen", client_id=client_id)
+    
     if not prepare_console("mainscreen", widget_list="3dview^2dview^ship_internal_view^ship_data^text_waterfall"):
         ->END
+    
+    player_ship_id = sbs.get_ship_of_client(client_id)
+    qlog(qlog_level_info(), f"@console/mainscreen view={get_mainscreen_view(player_ship_id)} facing={get_mainscreen_facing(player_ship_id)} mode={get_mainscreen_mode(player_ship_id)}", player_ship_id=player_ship_id, client_id=client_id)
     
     default tab = 1
     gui_section(style="area:0,45px,100-300px,100;")
@@ -40,10 +45,16 @@ set_is_console_ship_specific("mainscreen", True)
     # so that the element will (hopefully) have been presented already by the
     # time gui_hide is called.
     await delay_app(0)
+    
+    player_ship_id = sbs.get_ship_of_client(client_id)
+    qlog(qlog_level_info(), f"mainscreen_console_sync_after_delay view={get_mainscreen_view(player_ship_id)} facing={get_mainscreen_facing(player_ship_id)} mode={get_mainscreen_mode(player_ship_id)}", player_ship_id=player_ship_id, client_id=client_id)
+    
     jump mainscreen_console_sync_view_mode_and_facing
 
 ==== on_mainscreen_change ====
     player_ship_id = sbs.get_ship_of_client(client_id)
+    
+    qlog(qlog_level_info(), f"on_mainscreen_change MAIN_SCREEN_VIEW={MAIN_SCREEN_VIEW} MAIN_SCREEN_FACING={MAIN_SCREEN_FACING} MAIN_SCREEN_MODE={MAIN_SCREEN_MODE} old view={get_mainscreen_view(player_ship_id)} old facing={get_mainscreen_facing(player_ship_id)} old mode={get_mainscreen_mode(player_ship_id)}", player_ship_id=player_ship_id, client_id=client_id)
     
     # This label will run for every mainscreen client (or server) for
     # each time that client's ship's mainscreen settings were changed by the
@@ -83,6 +94,8 @@ set_is_console_ship_specific("mainscreen", True)
     if MAIN_SCREEN_MODE != "cinematic":
         set_mainscreen_mode(player_ship_id, MAIN_SCREEN_MODE)
     
+    qlog(qlog_level_info(), f"on_mainscreen_change new view={get_mainscreen_view(player_ship_id)} new facing={get_mainscreen_facing(player_ship_id)} new mode={get_mainscreen_mode(player_ship_id)}", player_ship_id=player_ship_id, client_id=client_id)
+    
     task_schedule(mainscreen_console_sync_view_mode_and_facing)
     
     yield idle
@@ -92,6 +105,8 @@ set_is_console_ship_specific("mainscreen", True)
     view = get_mainscreen_view(player_ship_id)
     facing = get_mainscreen_facing(player_ship_id)
     mode = get_mainscreen_mode(player_ship_id)
+    
+    qlog(qlog_level_info(), f"mainscreen_console_sync_view_mode_and_facing view={view} facing={facing} mode={mode}", player_ship_id=player_ship_id, client_id=client_id)
     
     if view == "3d_view":
         gui_show(widget_3d_view)
